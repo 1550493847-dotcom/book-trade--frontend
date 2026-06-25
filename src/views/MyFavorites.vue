@@ -10,7 +10,7 @@
       >
         <div class="book-content" @click="goToDetail(item.bookId || item.id)">
           <div class="book-image">
-            <img v-if="item.images && item.images !== '/img/null'" :src="getImageUrl(item.images.split(',')[0])" class="book-img" />
+            <img v-if="item.images && item.images !== '/img/null'" v-lazy="getImageUrl(item.images.split(',')[0])" class="book-img" />
             <div v-else class="no-img">暂无图片</div>
           </div>
           <div class="book-info">

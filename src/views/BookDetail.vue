@@ -5,7 +5,7 @@
         <div class="images">
           <el-carousel height="400px" v-if="imageList.length > 0">
             <el-carousel-item v-for="(img, index) in imageList" :key="index">
-              <img :src="getImageUrl(img)" class="detail-img" />
+              <img v-lazy="getImageUrl(img)" class="detail-img" />
             </el-carousel-item>
           </el-carousel>
           <div v-else class="no-img">暂无图片</div>

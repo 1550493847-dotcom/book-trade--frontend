@@ -41,7 +41,7 @@
         </template>
         <div class="book-info">
           <div v-if="book.images && book.images !== '/img/null'">
-            <img :src="getImageUrl(book.images.split(',')[0])" class="book-img" />
+            <img v-lazy="getImageUrl(book.images.split(',')[0])" class="book-img" />
           </div>
           <div v-else class="no-img">暂无图片</div>
           <div>作者：{{ book.author || '未知' }}</div>

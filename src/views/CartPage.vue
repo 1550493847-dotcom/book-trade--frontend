@@ -6,7 +6,7 @@
       <el-card v-for="item in cartStore.items" :key="item.bookId" class="cart-item">
         <div class="item-content">
           <div class="item-image" @click="goToBook(item.bookId)">
-            <img v-if="item.images && item.images !== '/img/null'" :src="getImageUrl(item.images.split(',')[0])" class="book-img" />
+            <img v-if="item.images && item.images !== '/img/null'" v-lazy="getImageUrl(item.images.split(',')[0])" class="book-img" />
             <div v-else class="no-img">暂无图片</div>
           </div>
           <div class="item-info" @click="goToBook(item.bookId)">

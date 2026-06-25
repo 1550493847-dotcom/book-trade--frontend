@@ -22,7 +22,7 @@
       <div class="book-section">
         <h3>商品信息</h3>
         <div class="book-content" @click="goToBook(order.bookId)">
-          <img v-if="order.bookImage" :src="getImageUrl(order.bookImage)" class="book-img" />
+          <img v-if="order.bookImage" v-lazy="getImageUrl(order.bookImage)" class="book-img" />
           <div v-else class="no-img">暂无图片</div>
           <div class="book-info">
             <div class="book-title">{{ order.bookTitle || '二手图书' }}</div>

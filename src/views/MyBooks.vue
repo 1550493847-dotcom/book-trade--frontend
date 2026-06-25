@@ -6,7 +6,7 @@
       <el-card v-for="book in bookList" :key="book.id" class="book-card">
         <div class="book-content">
           <div class="book-image">
-            <img v-if="book.images && book.images !== '/img/null'" :src="getImageUrl(book.images.split(',')[0])" class="book-img" />
+            <img v-if="book.images && book.images !== '/img/null'" v-lazy="getImageUrl(book.images.split(',')[0])" class="book-img" />
             <div v-else class="no-img">暂无图片</div>
           </div>
           <div class="book-info">
