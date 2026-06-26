@@ -1,7 +1,0 @@
-﻿          <!-- 右侧：导航链接 -->
-          <div class="header-right">
-            <router-link to="/publish" class="nav-link nav-publish" v-if="isLogin">
-              <el-icon><Plus /></el-icon>
-              发布商品
-            </router-link>
-            <!-- 未登录 -->
