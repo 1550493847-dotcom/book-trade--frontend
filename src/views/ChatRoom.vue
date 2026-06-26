@@ -516,7 +516,7 @@ onMounted(async () => {
     return
   }
   if (userStore.userInfo?.id) {
-    myUserId.value = userStore.userInfo.id
+    myUserId.value = String(userStore.userInfo.id)
   }
   try {
     const res = await request.get(`/api/user/${otherId.value}`)
