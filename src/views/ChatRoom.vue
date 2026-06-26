@@ -6,7 +6,7 @@
         <el-icon><ArrowLeft /></el-icon>
       </el-button>
       <el-avatar :size="36" class="header-avatar">
-        {{ (otherName || '�?).charAt(0) }}
+        {{ (otherName || '??').charAt(0) }}
       </el-avatar>
       <div class="header-info">
         <div class="chat-title">{{ otherName }}</div>
@@ -17,13 +17,13 @@
     <!-- 消息列表 -->
     <div class="message-list" ref="messageListRef" v-loading="loading">
       <template v-for="(msg, index) in messages" :key="msg.id">
-        <!-- 日期分割�?-->
+        <!-- 日期分割??-->
         <div v-if="showDateDivider(index)" class="date-divider">
           <span class="date-text">{{ formatDate(msg.createTime) }}</span>
         </div>
 
         <div :class="['message-item', msg.senderId === myUserId ? 'mine' : 'other']">
-          <!-- 自己：内容在�?头像在右 -->
+          <!-- 自己：内容在??头像在右 -->
           <template v-if="msg.senderId === myUserId">
             <div class="message-content">
               <div class="message-bubble">
@@ -50,13 +50,13 @@
               </div>
             </div>
             <el-avatar :size="36" class="msg-avatar" :src="userStore.avatarUrl">
-              {{ (userStore.displayName || '�?).charAt(0) }}
+              {{ (userStore.displayName || '??').charAt(0) }}
             </el-avatar>
           </template>
-          <!-- 对方：头像在�?内容在右 -->
+          <!-- 对方：头像在??内容在右 -->
           <template v-else>
             <el-avatar :size="36" class="msg-avatar">
-              {{ (otherName || '�?).charAt(0) }}
+              {{ (otherName || '??').charAt(0) }}
             </el-avatar>
             <div class="message-content">
               <div class="message-bubble">
@@ -124,6 +124,7 @@
         <el-icon v-else class="loading-icon"><Loading /></el-icon>
       </el-button>
     </div>
+  </div>
 
     <!-- 订单卡片对话框 -->
     <el-dialog v-model="orderCardDialogVisible" title="发送订单卡片" width="380px" :close-on-click-modal="false">
@@ -136,7 +137,6 @@
         <el-button type="primary" @click="confirmOrderCard" :loading="orderCardLoading">确认发送</el-button>
       </template>
     </el-dialog>
-  </div>
 </template>
 <script setup>
 import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue'
@@ -161,7 +161,7 @@ const uploading = ref(false)
 const fileInputRef = ref(null)
 const inputRef = ref(null)
 
-const emojis = ['😀','😃','😄','😁','😆','😊','😍','😘','😗','😙','😔','😭','😂','😮','😢','😠','😒','😎','👍','👎','👏','👌','�?,'�?,'💯','💤','�?,'💛','💚','💙','💜','💦','☀','🌟','🌍','💎','🎉','🎁','🎂','🍰','�?,'🍵','🚀','�?,'📱','💻','💬','📖']
+const emojis = ['😀','😃','😄','😁','😆','😊','😍','😘','😗','😙','😔','😭','😂','😮','😢','😠','😒','😎','👍','👎','👏','👌','✌','✌','💯','💤','❤','💛','💚','💙','💜','💦','☀','🌟','🌍','💎','🎉','🎁','🎂','🍰','☕','🍵','🚀','✌','📱','💻','💬','📖']
 
 const isImage = (content) => {
   if (typeof content !== 'string') return false
@@ -321,7 +321,6 @@ const getOrderStatusText = (status) => {
 const goToOrder = (orderId) => {
   window.open('/order/' + orderId, '_blank')
 }
-
 const previewImage = (url) => {
   window.open(url, '_blank')
 }
@@ -338,7 +337,7 @@ let reconnectTimer = null
 let reconnectAttempts = 0
 let pollingTimer = null
 
-// ===== 时间格式�?=====
+// ===== 时间格式??=====
 
 const formatTime = (timeStr) => {
   if (!timeStr) return ''
@@ -362,7 +361,7 @@ const formatDate = (timeStr) => {
   const y = date.getFullYear()
   const m = (date.getMonth() + 1).toString().padStart(2, '0')
   const d = date.getDate().toString().padStart(2, '0')
-  return `${y}-�?${d}`
+  return `${y}-??${d}`
 }
 
 const showDateDivider = (index) => {
@@ -496,7 +495,7 @@ const sendMessage = async () => {
       content: text,
     })
     if (res.code !== 200) {
-      // 替换临时消息为失败状�?
+      // 替换临时消息为失败状??
       const failIdx = messages.value.findIndex((m) => m.id === optimisticMsg.id)
       if (failIdx >= 0) messages.value[failIdx].failed = true
     }
@@ -512,7 +511,7 @@ const sendMessage = async () => {
 
 onMounted(async () => {
   if (!otherId.value || otherId.value === 'undefined' || otherId.value === 'null') {
-    ElMessage.warning('无效的对�?)
+    ElMessage.warning('无效的对??')
     router.push('/chat')
     return
   }
@@ -590,7 +589,7 @@ onUnmounted(() => {
   scroll-behavior: smooth;
 }
 
-/* 日期分割�?*/
+/* 日期分割??*/
 .date-divider {
   display: flex;
   justify-content: center;
@@ -604,7 +603,7 @@ onUnmounted(() => {
   border-radius: 10px;
 }
 
-/* 消息�?*/
+/* 消息??*/
 .message-item {
   display: flex;
   align-items: flex-end;
@@ -664,7 +663,7 @@ onUnmounted(() => {
   white-space: pre-wrap;
 }
 
-/* 元信�?*/
+/* 元信??*/
 .message-meta {
   display: flex;
   align-items: center;
@@ -734,9 +733,9 @@ onUnmounted(() => {
   animation: spin 1s linear infinite;
 }
 
-/* ===== 响应�?===== */
+/* ===== 响应??===== */
 
-/* ===== 输入工具�?===== */
+/* ===== 输入工具??===== */
 .input-toolbar {
   display: flex;
   flex-direction: column;
@@ -789,6 +788,17 @@ onUnmounted(() => {
   transform: scale(1.02);
 }
 
+@media (max-width: 768px) {
+  .chat-room-container {
+    padding: 0 10px 10px;
+    border-radius: 0;
+    height: calc(100vh - 60px);
+  }
+  .chat-header { padding: 10px 0; }
+  .message-item { max-width: 90%; }
+  .msg-image { max-width: 160px; max-height: 200px; }
+  .input-area { gap: 6px; }
+}
 
 /* ===== 加号菜单 ===== */
 .plus-menu {
@@ -870,15 +880,4 @@ onUnmounted(() => {
   padding: 8px 0;
 }
 
-@media (max-width: 768px) {
-  .chat-room-container {
-    padding: 0 10px 10px;
-    border-radius: 0;
-    height: calc(100vh - 60px);
-  }
-  .chat-header { padding: 10px 0; }
-  .message-item { max-width: 90%; }
-  .msg-image { max-width: 160px; max-height: 200px; }
-  .input-area { gap: 6px; }
-}
 </style>
