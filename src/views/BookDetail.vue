@@ -19,7 +19,7 @@
           <p class="original-price"><strong>原价：</strong>¥{{ book.originalPrice }}</p>
           <p><strong>描述：</strong>{{ book.description || '暂无描述' }}</p>
           <p><strong>浏览量：</strong>{{ book.viewCount || 0 }}</p>
-          <p><strong>卖家：</strong>{{ book.sellerName || '未知' }}</p>
+          <p><strong>卖家：</strong>{{ book.sellerName || book.seller?.nickname || book.seller?.username || book.nickname || book.username || '未知' }}</p>
           
           <div class="actions">
             <el-button type="primary" @click="buyNow">立即购买</el-button>
@@ -102,8 +102,9 @@ const addToCart = () => {
 
 const goChat = () => {
   if (!checkLogin()) return
-  if (book.value.sellerId) {
-    router.push(`/chat/${book.value.sellerId}`)
+  const sid = book.value.sellerId || book.value.userId || book.value.seller?.id
+  if (sid) {
+    router.push(`/chat/${sid}`)
   } else {
     ElMessage.warning('无法获取卖家信息')
   }
