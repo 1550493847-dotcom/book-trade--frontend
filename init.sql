@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `nickname`    VARCHAR(50)  DEFAULT NULL,
   `avatar`      VARCHAR(255) DEFAULT NULL COMMENT 'avatar URL',
   `phone`       VARCHAR(20)  DEFAULT NULL,
-  `email`       VARCHAR(100) DEFAULT NULL,
+  `school_name` VARCHAR(100) DEFAULT NULL,
   `create_time` DATETIME     DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_username (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS `book` (
   INDEX idx_user_id (`user_id`),
   INDEX idx_category (`category`),
   INDEX idx_status (`status`),
+  INDEX idx_create_time (`create_time`),
   INDEX idx_create_time (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -61,11 +62,14 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `seller_id`    INT          NOT NULL,
   `status`       TINYINT      DEFAULT 0 COMMENT 'order status',
   `create_time`  DATETIME     DEFAULT CURRENT_TIMESTAMP,
-  `update_time`  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `pay_time`     DATETIME     DEFAULT NULL,
+  `ship_time`    DATETIME     DEFAULT NULL,
+  `confirm_time` DATETIME     DEFAULT NULL,
   INDEX idx_buyer_id (`buyer_id`),
   INDEX idx_seller_id (`seller_id`),
   INDEX idx_book_id (`book_id`),
-  INDEX idx_status (`status`)
+  INDEX idx_status (`status`),
+  INDEX idx_create_time (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================
@@ -73,12 +77,12 @@ CREATE TABLE IF NOT EXISTS `orders` (
 -- ============================================================
 CREATE TABLE IF NOT EXISTS `chat_message` (
   `id`          INT      AUTO_INCREMENT PRIMARY KEY,
-  `sender_id`   INT      NOT NULL,
-  `receiver_id` INT      NOT NULL,
+  `from_user_id` INT  NOT NULL,
+  `to_user_id`   INT  NOT NULL,
   `content`     TEXT     NOT NULL,
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_sender_receiver (`sender_id`, `receiver_id`),
-  INDEX idx_receiver_sender (`receiver_id`, `sender_id`),
+  INDEX idx_from_to (`from_user_id`, `to_user_id`),
+  INDEX idx_to_from (`to_user_id`, `from_user_id`),
   INDEX idx_create_time (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
