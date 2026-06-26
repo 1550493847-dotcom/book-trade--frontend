@@ -1,40 +1,78 @@
 <template>
   <div class="chat-room-container">
+    <!-- 头部 -->
     <div class="chat-header">
       <el-button size="small" @click="$router.back()" circle>
         <el-icon><ArrowLeft /></el-icon>
       </el-button>
-      <span class="chat-title">与 {{ otherName }} 的对话</span>
-    </div>
-    <div class="message-list" ref="messageListRef">
-      <div
-        v-for="msg in messages"
-        :key="msg.id"
-        :class="['message-item', msg.senderId === myUserId ? 'mine' : 'other']"
-      >
-        <div class="message-bubble">
-          <div class="message-text">{{ msg.content }}</div>
-          <div class="message-time">{{ formatTime(msg.createTime) }}</div>
-        </div>
+      <el-avatar :size="36" class="header-avatar">
+        {{ (otherName || '用').charAt(0) }}
+      </el-avatar>
+      <div class="header-info">
+        <div class="chat-title">{{ otherName }}</div>
+        <div class="chat-status" v-if="wsConnected">在线</div>
       </div>
     </div>
+
+    <!-- 消息列表 -->
+    <div class="message-list" ref="messageListRef" v-loading="loading">
+      <template v-for="(msg, index) in messages" :key="msg.id">
+        <!-- 日期分割线 -->
+        <div v-if="showDateDivider(index)" class="date-divider">
+          <span class="date-text">{{ formatDate(msg.createTime) }}</span>
+        </div>
+
+        <div :class="['message-item', msg.senderId === myUserId ? 'mine' : 'other']">
+          <!-- 对方头像 -->
+          <el-avatar v-if="msg.senderId !== myUserId" :size="36" class="msg-avatar">
+            {{ (otherName || '用').charAt(0) }}
+          </el-avatar>
+
+          <div class="message-content">
+            <div class="message-bubble">
+              <div class="message-text">{{ msg.content }}</div>
+            </div>
+            <div class="message-meta">
+              <span class="message-time">{{ formatTime(msg.createTime) }}</span>
+              <el-icon v-if="msg.senderId === myUserId && String(msg.id).startsWith('temp-')" class="status-icon sending">
+                <Loading />
+              </el-icon>
+            </div>
+          </div>
+
+          <!-- 自己头像 -->
+          <el-avatar v-if="msg.senderId === myUserId" :size="36" class="msg-avatar" :src="userStore.avatarUrl">
+            {{ (userStore.displayName || '我').charAt(0) }}
+          </el-avatar>
+        </div>
+      </template>
+    </div>
+
+    <!-- 输入区域 -->
     <div class="input-area">
       <el-input
         v-model="inputText"
         placeholder="输入消息..."
         @keyup.enter="sendMessage"
         class="message-input"
-      />
-      <el-button type="primary" @click="sendMessage" :disabled="!inputText.trim()">发送</el-button>
+        :disabled="sending"
+      >
+        <template #prefix>
+          <el-icon class="input-icon"><ChatLineRound /></el-icon>
+        </template>
+      </el-input>
+      <el-button type="primary" @click="sendMessage" :disabled="!inputText.trim() || sending" class="send-btn">
+        <el-icon v-if="!sending"><Promotion /></el-icon>
+        <el-icon v-else class="loading-icon"><Loading /></el-icon>
+      </el-button>
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ArrowLeft } from '@element-plus/icons-vue'
+import { ArrowLeft, ChatLineRound, Promotion, Loading } from '@element-plus/icons-vue'
 import request from '@/api/request'
 import { useUserStore } from '@/stores/user'
 
@@ -46,6 +84,9 @@ const inputText = ref('')
 const messageListRef = ref(null)
 const otherName = ref('')
 const myUserId = ref(null)
+const loading = ref(false)
+const sending = ref(false)
+const wsConnected = ref(false)
 const otherId = computed(() => String(route.params.id))
 
 const wsUrl = computed(() => {
@@ -59,20 +100,57 @@ let reconnectTimer = null
 let reconnectAttempts = 0
 let pollingTimer = null
 
+// ===== 时间格式化 =====
+
 const formatTime = (timeStr) => {
   if (!timeStr) return ''
   const date = new Date(timeStr)
-  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+  const h = date.getHours().toString().padStart(2, '0')
+  const m = date.getMinutes().toString().padStart(2, '0')
+  return `${h}:${m}`
 }
+
+const formatDate = (timeStr) => {
+  if (!timeStr) return ''
+  const date = new Date(timeStr)
+  const now = new Date()
+  const isToday = date.toDateString() === now.toDateString()
+  const yesterday = new Date(now)
+  yesterday.setDate(yesterday.getDate() - 1)
+  const isYesterday = date.toDateString() === yesterday.toDateString()
+
+  if (isToday) return '今天'
+  if (isYesterday) return '昨天'
+  const y = date.getFullYear()
+  const m = (date.getMonth() + 1).toString().padStart(2, '0')
+  const d = date.getDate().toString().padStart(2, '0')
+  return `${y}-月-${d}`
+}
+
+const showDateDivider = (index) => {
+  if (index === 0) return true
+  const curr = messages.value[index]
+  const prev = messages.value[index - 1]
+  if (!curr || !prev || !curr.createTime || !prev.createTime) return false
+  const currDate = new Date(curr.createTime).toDateString()
+  const prevDate = new Date(prev.createTime).toDateString()
+  return currDate !== prevDate
+}
+
+// ===== 滚动 =====
 
 const scrollToBottom = async () => {
   await nextTick()
+  await nextTick() // double tick for images to load
   if (messageListRef.value) {
     messageListRef.value.scrollTop = messageListRef.value.scrollHeight
   }
 }
 
+// ===== 加载消息 =====
+
 const loadMessages = async () => {
+  loading.value = true
   try {
     const res = await request.get(`/api/chat/messages/${otherId.value}`)
     if (res.code === 200) {
@@ -81,16 +159,23 @@ const loadMessages = async () => {
     }
   } catch (error) {
     console.error('加载消息失败:', error)
+  } finally {
+    loading.value = false
   }
 }
 
+// ===== WebSocket =====
+
 const connectWs = () => {
   if (!wsUrl.value) { startPollingFallback(); return }
-  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
-    return
-  }
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return
+
   ws = new WebSocket(wsUrl.value)
-  ws.onopen = () => { reconnectAttempts = 0; stopPollingFallback() }
+  ws.onopen = () => {
+    reconnectAttempts = 0
+    wsConnected.value = true
+    stopPollingFallback()
+  }
   ws.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data)
@@ -100,11 +185,8 @@ const connectWs = () => {
       if (msgOtherId !== otherId.value) return
       const exists = messages.value.some((m) => m.id === msg.id)
       if (exists) return
-      // 替换临时消息（乐观 UI 发送的 temp-xxx）
       const tempIdx = messages.value.findIndex(
-        (m) => String(m.id).startsWith('temp-')
-          && m.senderId === msg.senderId
-          && m.content === msg.content
+        (m) => String(m.id).startsWith('temp-') && m.senderId === msg.senderId && m.content === msg.content
       )
       if (tempIdx >= 0) {
         messages.value[tempIdx] = msg
@@ -115,28 +197,27 @@ const connectWs = () => {
     } catch { /* ignore */ }
   }
   ws.onclose = (event) => {
+    wsConnected.value = false
     if (!event.wasClean && reconnectAttempts < 10) {
       reconnectTimer = setTimeout(() => { reconnectAttempts++; connectWs() }, 3000)
     }
   }
   ws.onerror = () => {
-    console.warn('WebSocket 连接失败：后端未提供 ws://localhost:8080/ws/chat 端点，将降级为 REST 轮询模式')
+    wsConnected.value = false
     startPollingFallback()
   }
 }
 
 const disconnectWs = () => {
+  wsConnected.value = false
   if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null }
   stopPollingFallback()
   if (ws) { ws.close(); ws = null }
 }
 
-// WebSocket 不可用时的降级轮询（5 秒间隔）
 const startPollingFallback = () => {
   if (pollingTimer) return
-  pollingTimer = setInterval(() => {
-    loadMessages()
-  }, 5000)
+  pollingTimer = setInterval(() => { loadMessages() }, 5000)
 }
 
 const stopPollingFallback = () => {
@@ -152,9 +233,10 @@ const wsSendMessage = (text) => {
 }
 
 const sendMessage = async () => {
-  if (!inputText.value.trim()) return
+  if (!inputText.value.trim() || sending.value) return
   const text = inputText.value.trim()
   inputText.value = ''
+  sending.value = true
 
   const optimisticMsg = {
     id: `temp-${Date.now()}-${Math.random()}`,
@@ -165,7 +247,10 @@ const sendMessage = async () => {
   messages.value.push(optimisticMsg)
   scrollToBottom()
 
-  if (wsSendMessage(text)) return
+  if (wsSendMessage(text)) {
+    sending.value = false
+    return
+  }
 
   try {
     const res = await request.post('/api/chat/send', {
@@ -173,15 +258,21 @@ const sendMessage = async () => {
       content: text,
     })
     if (res.code !== 200) {
-      ElMessage.error(res.message || '发送失败')
+      // 替换临时消息为失败状态
+      const failIdx = messages.value.findIndex((m) => m.id === optimisticMsg.id)
+      if (failIdx >= 0) messages.value[failIdx].failed = true
     }
   } catch {
-    ElMessage.error('发送失败（后端接口异常），请确认后端服务已启动')
+    const failIdx = messages.value.findIndex((m) => m.id === optimisticMsg.id)
+    if (failIdx >= 0) messages.value[failIdx].failed = true
+  } finally {
+    sending.value = false
   }
 }
 
+// ===== 生命周期 =====
+
 onMounted(async () => {
-  // 检查 otherId 是否有效
   if (!otherId.value || otherId.value === 'undefined' || otherId.value === 'null') {
     ElMessage.warning('无效的对话')
     router.push('/chat')
@@ -206,7 +297,6 @@ onUnmounted(() => {
   disconnectWs()
 })
 </script>
-
 <style scoped>
 .chat-room-container {
   max-width: 700px;
@@ -215,72 +305,205 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 80px);
+  background: #f8f6f3;
+  border-radius: 16px;
 }
+
+/* ===== 头部 ===== */
 .chat-header {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 0;
-  border-bottom: 1px solid #eee;
+  padding: 14px 0;
+  border-bottom: 1px solid #e8e0d6;
+  background: #f8f6f3;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.header-avatar {
+  background: linear-gradient(135deg, #8b5e3c, #a0712a);
+  color: #fff;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+.header-info {
+  flex: 1;
 }
 .chat-title {
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 600;
+  color: #3d2413;
 }
+.chat-status {
+  font-size: 11px;
+  color: #67c23a;
+  margin-top: 2px;
+}
+
+/* ===== 消息列表 ===== */
 .message-list {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 0;
+  padding: 16px 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  scroll-behavior: smooth;
 }
+
+/* 日期分割线 */
+.date-divider {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+.date-text {
+  font-size: 11px;
+  color: #b8956e;
+  background: #ede4d8;
+  padding: 2px 14px;
+  border-radius: 10px;
+}
+
+/* 消息项 */
 .message-item {
   display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 85%;
 }
 .message-item.mine {
-  justify-content: flex-end;
+  align-self: flex-end;
+  flex-direction: row-reverse;
 }
 .message-item.other {
-  justify-content: flex-start;
+  align-self: flex-start;
 }
+
+.msg-avatar {
+  flex-shrink: 0;
+  margin-bottom: 18px;
+}
+.mine .msg-avatar {
+  background: linear-gradient(135deg, #8b5e3c, #a0712a);
+  color: #fff;
+  font-weight: bold;
+}
+.other .msg-avatar {
+  background: #d4c5b8;
+  color: #6d4526;
+  font-weight: bold;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 气泡 */
 .message-bubble {
-  max-width: 60%;
   padding: 10px 14px;
-  border-radius: 12px;
+  border-radius: 16px;
   font-size: 14px;
   line-height: 1.5;
+  word-break: break-word;
 }
 .mine .message-bubble {
-  background: #409eff;
-  color: white;
+  background: linear-gradient(135deg, #8b5e3c, #a0712a);
+  color: #fff;
   border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 8px rgba(139,94,60,0.15);
 }
 .other .message-bubble {
-  background: #f4f4f5;
-  color: #333;
+  background: #fff;
+  color: #3d2413;
   border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.message-text {
+  white-space: pre-wrap;
+}
+
+/* 元信息 */
+.message-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  padding: 0 4px;
+}
+.mine .message-meta {
+  justify-content: flex-end;
 }
 .message-time {
   font-size: 11px;
-  margin-top: 4px;
-  opacity: 0.7;
+  color: #b8956e;
 }
+.status-icon {
+  font-size: 12px;
+}
+.status-icon.sending {
+  color: #b8956e;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ===== 输入区域 ===== */
 .input-area {
   display: flex;
-  gap: 10px;
-  padding-top: 12px;
-  border-top: 1px solid #eee;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px solid #e8e0d6;
+  background: #f8f6f3;
 }
 .message-input {
   flex: 1;
 }
-
-@media (max-width: 768px) {
-  .chat-room-container { padding: 0 10px 10px; }
-  .chat-header { padding: 10px 0; }
-  .message-bubble { max-width: 80%; }
-  .input-area { gap: 6px; }
+.message-input :deep(.el-input__wrapper) {
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.message-input :deep(.el-input__wrapper):focus-within {
+  box-shadow: 0 0 0 1px #a0712a;
+}
+.input-icon {
+  color: #b8956e;
+  font-size: 16px;
+}
+.send-btn {
+  border-radius: 50% !important;
+  width: 42px;
+  height: 42px;
+  padding: 0 !important;
+  background: linear-gradient(135deg, #8b5e3c, #a0712a) !important;
+  border: none !important;
+  flex-shrink: 0;
+}
+.send-btn:hover {
+  background: linear-gradient(135deg, #a0712a, #c4903e) !important;
+}
+.send-btn .el-icon {
+  font-size: 18px;
+}
+.loading-icon {
+  animation: spin 1s linear infinite;
 }
 
+/* ===== 响应式 ===== */
+@media (max-width: 768px) {
+  .chat-room-container {
+    padding: 0 10px 10px;
+    border-radius: 0;
+    height: calc(100vh - 60px);
+  }
+  .chat-header { padding: 10px 0; }
+  .message-item { max-width: 90%; }
+  .input-area { gap: 6px; }
+}
 </style>
