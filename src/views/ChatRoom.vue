@@ -99,7 +99,19 @@ const connectWs = () => {
       const msgOtherId = String(msg.senderId === myUserId.value ? msg.receiverId : msg.senderId)
       if (msgOtherId !== otherId.value) return
       const exists = messages.value.some((m) => m.id === msg.id)
-      if (!exists) { messages.value.push(msg); scrollToBottom() }
+      if (exists) return
+      // 替换临时消息（乐观 UI 发送的 temp-xxx）
+      const tempIdx = messages.value.findIndex(
+        (m) => String(m.id).startsWith('temp-')
+          && m.senderId === msg.senderId
+          && m.content === msg.content
+      )
+      if (tempIdx >= 0) {
+        messages.value[tempIdx] = msg
+      } else {
+        messages.value.push(msg)
+      }
+      scrollToBottom()
     } catch { /* ignore */ }
   }
   ws.onclose = (event) => {
