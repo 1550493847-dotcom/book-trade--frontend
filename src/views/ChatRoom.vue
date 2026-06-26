@@ -106,7 +106,9 @@ const connectWs = () => {
       reconnectTimer = setTimeout(() => { reconnectAttempts++; connectWs() }, 3000)
     }
   }
-  ws.onerror = () => {}
+  ws.onerror = () => {
+    console.warn('WebSocket 连接失败：后端未提供 ws://localhost:8080/ws/chat 端点，将降级为 REST 模式')
+  }
 }
 
 const disconnectWs = () => {
@@ -147,7 +149,7 @@ const sendMessage = async () => {
       ElMessage.error(res.message || '发送失败')
     }
   } catch {
-    ElMessage.error('发送失败，请检查网络')
+    ElMessage.error('发送失败（后端接口异常），请确认后端服务已启动')
   }
 }
 
