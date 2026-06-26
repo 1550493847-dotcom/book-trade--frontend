@@ -6,7 +6,7 @@
         <el-icon><ArrowLeft /></el-icon>
       </el-button>
       <el-avatar :size="36" class="header-avatar">
-        {{ (otherName || '�?).charAt(0) }}
+        {{ (otherName || '�?).charAt(0) }}
       </el-avatar>
       <div class="header-info">
         <div class="chat-title">{{ otherName }}</div>
@@ -17,18 +17,28 @@
     <!-- 消息列表 -->
     <div class="message-list" ref="messageListRef" v-loading="loading">
       <template v-for="(msg, index) in messages" :key="msg.id">
-        <!-- 日期分割�?-->
+        <!-- 日期分割�?-->
         <div v-if="showDateDivider(index)" class="date-divider">
           <span class="date-text">{{ formatDate(msg.createTime) }}</span>
         </div>
 
         <div :class="['message-item', msg.senderId === myUserId ? 'mine' : 'other']">
-          <!-- 自己：内容在�?头像在右 -->
+          <!-- 自己：内容在�?头像在右 -->
           <template v-if="msg.senderId === myUserId">
             <div class="message-content">
               <div class="message-bubble">
                 <template v-if="isImage(msg.content)">
                   <img :src="msg.content" class="msg-image" @click="previewImage(msg.content)" @load="scrollToBottom" />
+                </template>
+                <template v-else-if="isOrderCard(msg.content)">
+                  <div class="order-card-bubble" @click="goToOrder(getOrderCardId(msg.content))">
+                    <div class="order-card-header">📋 订单卡片</div>
+                    <div class="order-card-body">
+                      <div class="order-card-title">{{ getOrderCardData(msg.content).bookTitle || '二手图书' }}</div>
+                      <div class="order-card-price">¥{{ getOrderCardData(msg.content).totalPrice }}</div>
+                      <el-tag size="small" :type="getOrderStatusType(getOrderCardData(msg.content).status)">{{ getOrderStatusText(getOrderCardData(msg.content).status) }}</el-tag>
+                    </div>
+                  </div>
                 </template>
                 <template v-else>
                   <div class="message-text">{{ msg.content }}</div>
@@ -40,18 +50,28 @@
               </div>
             </div>
             <el-avatar :size="36" class="msg-avatar" :src="userStore.avatarUrl">
-              {{ (userStore.displayName || '�?).charAt(0) }}
+              {{ (userStore.displayName || '�?).charAt(0) }}
             </el-avatar>
           </template>
-          <!-- 对方：头像在�?内容在右 -->
+          <!-- 对方：头像在�?内容在右 -->
           <template v-else>
             <el-avatar :size="36" class="msg-avatar">
-              {{ (otherName || '�?).charAt(0) }}
+              {{ (otherName || '�?).charAt(0) }}
             </el-avatar>
             <div class="message-content">
               <div class="message-bubble">
                 <template v-if="isImage(msg.content)">
                   <img :src="msg.content" class="msg-image" @click="previewImage(msg.content)" @load="scrollToBottom" />
+                </template>
+                <template v-else-if="isOrderCard(msg.content)">
+                  <div class="order-card-bubble" @click="goToOrder(getOrderCardId(msg.content))">
+                    <div class="order-card-header">📋 订单卡片</div>
+                    <div class="order-card-body">
+                      <div class="order-card-title">{{ getOrderCardData(msg.content).bookTitle || '二手图书' }}</div>
+                      <div class="order-card-price">¥{{ getOrderCardData(msg.content).totalPrice }}</div>
+                      <el-tag size="small" :type="getOrderStatusType(getOrderCardData(msg.content).status)">{{ getOrderStatusText(getOrderCardData(msg.content).status) }}</el-tag>
+                    </div>
+                  </div>
                 </template>
                 <template v-else>
                   <div class="message-text">{{ msg.content }}</div>
@@ -79,10 +99,23 @@
             <span v-for="emoji in emojis" :key="emoji" class="emoji-item" @click="insertEmoji(emoji)">{{ emoji }}</span>
           </div>
         </el-popover>
-        <el-button size="small" class="toolbar-btn" circle @click="triggerUpload" :disabled="uploading">
-          <el-icon v-if="!uploading"><PictureFilled /></el-icon>
-          <el-icon v-else class="loading-icon"><Loading /></el-icon>
-        </el-button>
+        <el-popover placement="top-start" :width="160" trigger="click" popper-class="plus-menu-popover">
+          <template #reference>
+            <el-button size="small" class="toolbar-btn" circle>
+              <el-icon><Plus /></el-icon>
+            </el-button>
+          </template>
+          <div class="plus-menu">
+            <div class="plus-menu-item" @click="handlePlusMenuClick('image')">
+              <el-icon><PictureFilled /></el-icon>
+              <span>发送图片</span>
+            </div>
+            <div class="plus-menu-item" @click="handlePlusMenuClick('order')">
+              <el-icon><Document /></el-icon>
+              <span>发送订单卡片</span>
+            </div>
+          </div>
+        </el-popover>
         <input ref="fileInputRef" type="file" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp" style="display:none" @change="handleFileSelect" />
       </div>
       <el-input v-model="inputText" placeholder="输入消息..." @keyup.enter="sendMessage" class="message-input" :disabled="sending || uploading" ref="inputRef" />
@@ -91,13 +124,25 @@
         <el-icon v-else class="loading-icon"><Loading /></el-icon>
       </el-button>
     </div>
+
+    <!-- 订单卡片对话框 -->
+    <el-dialog v-model="orderCardDialogVisible" title="发送订单卡片" width="380px" :close-on-click-modal="false">
+      <div class="order-card-form">
+        <el-input v-model="orderCardId" placeholder="请输入订单ID" type="number" />
+        <p class="order-card-hint">输入你要发送的订单编号，对方将收到一张订单卡片</p>
+      </div>
+      <template #footer>
+        <el-button @click="orderCardDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmOrderCard" :loading="orderCardLoading">确认发送</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 <script setup>
 import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ArrowLeft, ChatLineRound, Promotion, Loading, ChatDotSquare, PictureFilled } from '@element-plus/icons-vue'
+import { ArrowLeft, ChatLineRound, Promotion, Loading, ChatDotSquare, PictureFilled, Plus, Document } from '@element-plus/icons-vue'
 import request from '@/api/request'
 import { useUserStore } from '@/stores/user'
 
@@ -116,7 +161,7 @@ const uploading = ref(false)
 const fileInputRef = ref(null)
 const inputRef = ref(null)
 
-const emojis = ['😀','😃','😄','😁','😆','😊','😍','😘','😗','😙','😔','😭','😂','😮','😢','😠','😒','😎','👍','👎','👏','👌','�?,'�?,'💯','💤','�?,'💛','💚','💙','💜','💦','☀','🌟','🌍','💎','🎉','🎁','🎂','🍰','�?,'🍵','🚀','�?,'📱','💻','💬','📖']
+const emojis = ['😀','😃','😄','😁','😆','😊','😍','😘','😗','😙','😔','😭','😂','😮','😢','😠','😒','😎','👍','👎','👏','👌','�?,'�?,'💯','💤','�?,'💛','💚','💙','💜','💦','☀','🌟','🌍','💎','🎉','🎁','🎂','🍰','�?,'🍵','🚀','�?,'📱','💻','💬','📖']
 
 const isImage = (content) => {
   if (typeof content !== 'string') return false
@@ -178,6 +223,105 @@ const sendImageMessage = async (url) => {
   }
 }
 
+// ===== 加号菜单 =====
+const handlePlusMenuClick = (action) => {
+  if (action === 'image') {
+    triggerUpload()
+  } else if (action === 'order') {
+    openOrderCardDialog()
+  }
+}
+
+// ===== 订单卡片 =====
+const orderCardDialogVisible = ref(false)
+const orderCardId = ref('')
+const orderCardLoading = ref(false)
+
+const openOrderCardDialog = () => {
+  orderCardId.value = ''
+  orderCardDialogVisible.value = true
+}
+
+const confirmOrderCard = async () => {
+  const id = orderCardId.value.trim()
+  if (!id) {
+    ElMessage.warning('请输入订单ID')
+    return
+  }
+  orderCardLoading.value = true
+  try {
+    const res = await request.get('/api/order/' + id)
+    if (res.code === 200 && res.data) {
+      const order = res.data
+      const cardData = {
+        orderId: order.id || id,
+        bookTitle: order.bookTitle || '二手图书',
+        totalPrice: order.totalPrice,
+        status: order.status,
+        bookImage: order.bookImage || '',
+      }
+      const msgContent = '[ORDER_CARD]' + JSON.stringify(cardData)
+      await sendOrderCardMessage(msgContent)
+      orderCardDialogVisible.value = false
+    } else {
+      ElMessage.error(res.message || '获取订单信息失败')
+    }
+  } catch {
+    ElMessage.error('获取订单信息失败，请检查订单ID')
+  } finally {
+    orderCardLoading.value = false
+  }
+}
+
+const sendOrderCardMessage = async (content) => {
+  const optimisticMsg = { id: 'temp-' + Date.now(), senderId: myUserId.value, content: content, createTime: new Date().toISOString() }
+  messages.value.push(optimisticMsg)
+  scrollToBottom()
+  if (wsSendMessage(content)) return
+  try {
+    const res = await request.post('/api/chat/send', { receiverId: Number(otherId.value), content: content })
+    if (res.code !== 200) {
+      const idx = messages.value.findIndex(m => m.id === optimisticMsg.id)
+      if (idx >= 0) messages.value.splice(idx, 1)
+    }
+  } catch {
+    const idx = messages.value.findIndex(m => m.id === optimisticMsg.id)
+    if (idx >= 0) messages.value.splice(idx, 1)
+  }
+}
+
+const isOrderCard = (content) => {
+  return typeof content === 'string' && content.startsWith('[ORDER_CARD]')
+}
+
+const getOrderCardData = (content) => {
+  try {
+    const json = content.slice('[ORDER_CARD]'.length)
+    return JSON.parse(json)
+  } catch {
+    return {}
+  }
+}
+
+const getOrderCardId = (content) => {
+  const data = getOrderCardData(content)
+  return data.orderId
+}
+
+const getOrderStatusType = (status) => {
+  const types = { 0: 'info', 1: 'success', 2: 'warning', 3: 'success' }
+  return types[status] || 'info'
+}
+
+const getOrderStatusText = (status) => {
+  const texts = { 0: '待付款', 1: '已付款', 2: '已发货', 3: '已完成' }
+  return texts[status] || '未知'
+}
+
+const goToOrder = (orderId) => {
+  window.open('/order/' + orderId, '_blank')
+}
+
 const previewImage = (url) => {
   window.open(url, '_blank')
 }
@@ -194,7 +338,7 @@ let reconnectTimer = null
 let reconnectAttempts = 0
 let pollingTimer = null
 
-// ===== 时间格式�?=====
+// ===== 时间格式�?=====
 
 const formatTime = (timeStr) => {
   if (!timeStr) return ''
@@ -218,7 +362,7 @@ const formatDate = (timeStr) => {
   const y = date.getFullYear()
   const m = (date.getMonth() + 1).toString().padStart(2, '0')
   const d = date.getDate().toString().padStart(2, '0')
-  return `${y}-�?${d}`
+  return `${y}-�?${d}`
 }
 
 const showDateDivider = (index) => {
@@ -352,7 +496,7 @@ const sendMessage = async () => {
       content: text,
     })
     if (res.code !== 200) {
-      // 替换临时消息为失败状�?
+      // 替换临时消息为失败状�?
       const failIdx = messages.value.findIndex((m) => m.id === optimisticMsg.id)
       if (failIdx >= 0) messages.value[failIdx].failed = true
     }
@@ -368,7 +512,7 @@ const sendMessage = async () => {
 
 onMounted(async () => {
   if (!otherId.value || otherId.value === 'undefined' || otherId.value === 'null') {
-    ElMessage.warning('无效的对�?)
+    ElMessage.warning('无效的对�?)
     router.push('/chat')
     return
   }
@@ -446,7 +590,7 @@ onUnmounted(() => {
   scroll-behavior: smooth;
 }
 
-/* 日期分割�?*/
+/* 日期分割�?*/
 .date-divider {
   display: flex;
   justify-content: center;
@@ -460,7 +604,7 @@ onUnmounted(() => {
   border-radius: 10px;
 }
 
-/* 消息�?*/
+/* 消息�?*/
 .message-item {
   display: flex;
   align-items: flex-end;
@@ -520,7 +664,7 @@ onUnmounted(() => {
   white-space: pre-wrap;
 }
 
-/* 元信�?*/
+/* 元信�?*/
 .message-meta {
   display: flex;
   align-items: center;
@@ -590,9 +734,9 @@ onUnmounted(() => {
   animation: spin 1s linear infinite;
 }
 
-/* ===== 响应�?===== */
+/* ===== 响应�?===== */
 
-/* ===== 输入工具�?===== */
+/* ===== 输入工具�?===== */
 .input-toolbar {
   display: flex;
   flex-direction: column;
@@ -643,6 +787,87 @@ onUnmounted(() => {
 }
 .msg-image:hover {
   transform: scale(1.02);
+}
+
+
+/* ===== 加号菜单 ===== */
+.plus-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.plus-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s;
+  color: #3d2413;
+  font-size: 14px;
+}
+.plus-menu-item:hover {
+  background: #f0ebe4;
+}
+.plus-menu-item .el-icon {
+  font-size: 18px;
+  color: #8b5e3c;
+}
+
+/* ===== 订单卡片气泡 ===== */
+.order-card-bubble {
+  cursor: pointer;
+  min-width: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.15s;
+}
+.order-card-bubble:hover {
+  transform: scale(1.02);
+}
+.mine .order-card-bubble {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.other .order-card-bubble {
+  background: #f5f0eb;
+  border: 1px solid #e8e0d6;
+}
+.order-card-header {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 12px 4px;
+}
+.mine .order-card-header { color: rgba(255,255,255,0.85); }
+.other .order-card-header { color: #8b5e3c; }
+.order-card-body {
+  padding: 4px 12px 10px;
+}
+.order-card-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mine .order-card-title { color: #fff; }
+.other .order-card-title { color: #3d2413; }
+.order-card-price {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.mine .order-card-price { color: #f0b45e; }
+.other .order-card-price { color: #d4943e; }
+.order-card-hint {
+  font-size: 12px;
+  color: #b8956e;
+  margin-top: 6px;
+}
+.order-card-form {
+  padding: 8px 0;
 }
 
 @media (max-width: 768px) {
