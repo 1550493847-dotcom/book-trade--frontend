@@ -57,6 +57,7 @@ const wsUrl = computed(() => {
 let ws = null
 let reconnectTimer = null
 let reconnectAttempts = 0
+let pollingTimer = null
 
 const formatTime = (timeStr) => {
   if (!timeStr) return ''
@@ -84,12 +85,12 @@ const loadMessages = async () => {
 }
 
 const connectWs = () => {
-  if (!wsUrl.value) return
+  if (!wsUrl.value) { startPollingFallback(); return }
   if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
     return
   }
   ws = new WebSocket(wsUrl.value)
-  ws.onopen = () => { reconnectAttempts = 0 }
+  ws.onopen = () => { reconnectAttempts = 0; stopPollingFallback() }
   ws.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data)
@@ -107,13 +108,27 @@ const connectWs = () => {
     }
   }
   ws.onerror = () => {
-    console.warn('WebSocket 连接失败：后端未提供 ws://localhost:8080/ws/chat 端点，将降级为 REST 模式')
+    console.warn('WebSocket 连接失败：后端未提供 ws://localhost:8080/ws/chat 端点，将降级为 REST 轮询模式')
+    startPollingFallback()
   }
 }
 
 const disconnectWs = () => {
   if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null }
+  stopPollingFallback()
   if (ws) { ws.close(); ws = null }
+}
+
+// WebSocket 不可用时的降级轮询（5 秒间隔）
+const startPollingFallback = () => {
+  if (pollingTimer) return
+  pollingTimer = setInterval(() => {
+    loadMessages()
+  }, 5000)
+}
+
+const stopPollingFallback = () => {
+  if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null }
 }
 
 const wsSendMessage = (text) => {
