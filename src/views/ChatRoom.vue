@@ -22,9 +22,9 @@
           <span class="date-text">{{ formatDate(msg.createTime) }}</span>
         </div>
 
-        <div :class="['message-item', msg.senderId === myUserId ? 'mine' : 'other']">
+        <div :class="['message-item', msg.senderId == myUserId ? 'mine' : 'other']">
           <!-- 自己：内容在??头像在右 -->
-          <template v-if="msg.senderId === myUserId">
+          <template v-if="msg.senderId == myUserId">
             <div class="message-content">
               <div class="message-bubble">
                 <template v-if="isImage(msg.content)">
@@ -418,12 +418,12 @@ const connectWs = () => {
       const data = JSON.parse(event.data)
       const msg = data.type === 'message' ? data.data : data
       if (!msg || !msg.id) return
-      const msgOtherId = String(msg.senderId === myUserId.value ? msg.receiverId : msg.senderId)
+      const msgOtherId = String(msg.senderId == myUserId.value ? msg.receiverId : msg.senderId)
       if (msgOtherId !== otherId.value) return
       const exists = messages.value.some((m) => m.id === msg.id)
       if (exists) return
       const tempIdx = messages.value.findIndex(
-        (m) => String(m.id).startsWith('temp-') && m.senderId === msg.senderId && m.content === msg.content
+        (m) => String(m.id).startsWith('temp-') && m.senderId == msg.senderId && m.content === msg.content
       )
       if (tempIdx >= 0) {
         messages.value[tempIdx] = msg
@@ -516,7 +516,7 @@ onMounted(async () => {
     return
   }
   if (userStore.userInfo?.id) {
-    myUserId.value = String(userStore.userInfo.id)
+    myUserId.value = Number(userStore.userInfo.id)
   }
   try {
     const res = await request.get(`/api/user/${otherId.value}`)
