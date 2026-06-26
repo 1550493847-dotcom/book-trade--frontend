@@ -23,9 +23,9 @@
         </div>
 
         <div :class="['message-item', msg.senderId === myUserId ? 'mine' : 'other']">
-          <!-- 对方头像 -->
-          <el-avatar v-if="msg.senderId !== myUserId" :size="36" class="msg-avatar">
-            {{ (otherName || '用').charAt(0) }}
+          <!-- 自己头像（右侧） -->
+          <el-avatar v-if="msg.senderId === myUserId" :size="36" class="msg-avatar" :src="userStore.avatarUrl">
+            {{ (userStore.displayName || '我').charAt(0) }}
           </el-avatar>
 
           <div class="message-content">
@@ -45,9 +45,9 @@
             </div>
           </div>
 
-          <!-- 自己头像 -->
-          <el-avatar v-if="msg.senderId === myUserId" :size="36" class="msg-avatar" :src="userStore.avatarUrl">
-            {{ (userStore.displayName || '我').charAt(0) }}
+          <!-- 对方头像（左侧） -->
+          <el-avatar v-if="msg.senderId !== myUserId" :size="36" class="msg-avatar">
+            {{ (otherName || '用').charAt(0) }}
           </el-avatar>
         </div>
       </template>
@@ -106,7 +106,12 @@ const inputRef = ref(null)
 const emojis = ['😀','😃','😄','😁','😆','😊','😍','😘','😗','😙','😔','😭','😂','😮','😢','😠','😒','😎','👍','👎','👏','👌','✌','✍','💯','💤','❤','💛','💚','💙','💜','💦','☀','🌟','🌍','💎','🎉','🎁','🎂','🍰','☕','🍵','🚀','✈','📱','💻','💬','📖']
 
 const isImage = (content) => {
-  return typeof content === 'string' && /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(content)
+  if (typeof content !== 'string') return false
+  // Match http URLs ending with image extensions
+  if (/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(content)) return true
+  // Also match relative paths like /uploads/xxx.jpg
+  if (/^\/uploads\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(content)) return true
+  return false
 }
 
 const insertEmoji = (emoji) => {
@@ -131,7 +136,8 @@ const handleFileSelect = async (event) => {
       timeout: 30000,
     })
     if (res.code === 200) {
-      await sendImageMessage('http://localhost:8080' + res.data)
+      const imgUrl = res.data.startsWith('http') ? res.data : 'http://localhost:8080' + res.data
+      await sendImageMessage(imgUrl)
     } else {
       ElMessage.error(res.message || '上传失败')
     }
@@ -450,7 +456,7 @@ onUnmounted(() => {
 }
 .message-item.mine {
   align-self: flex-end;
-  flex-direction: row-reverse;
+  flex-direction: row;
 }
 .message-item.other {
   align-self: flex-start;
@@ -594,16 +600,18 @@ onUnmounted(() => {
 }
 .emoji-grid {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 4px;
-  padding: 4px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
+  padding: 6px;
+  max-height: 180px;
+  overflow-y: auto;
 }
 .emoji-item {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  padding: 4px;
+  font-size: 20px;
+  padding: 3px;
   cursor: pointer;
   border-radius: 8px;
   transition: background 0.15s;
