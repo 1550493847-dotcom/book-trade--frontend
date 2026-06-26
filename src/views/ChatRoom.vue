@@ -30,7 +30,12 @@
 
           <div class="message-content">
             <div class="message-bubble">
-              <div class="message-text">{{ msg.content }}</div>
+              <template v-if="isImage(msg.content)">
+                <img :src="msg.content" class="msg-image" @click="previewImage(msg.content)" @load="scrollToBottom" />
+              </template>
+              <template v-else>
+                <div class="message-text">{{ msg.content }}</div>
+              </template>
             </div>
             <div class="message-meta">
               <span class="message-time">{{ formatTime(msg.createTime) }}</span>
@@ -50,18 +55,25 @@
 
     <!-- 输入区域 -->
     <div class="input-area">
-      <el-input
-        v-model="inputText"
-        placeholder="输入消息..."
-        @keyup.enter="sendMessage"
-        class="message-input"
-        :disabled="sending"
-      >
-        <template #prefix>
-          <el-icon class="input-icon"><ChatLineRound /></el-icon>
-        </template>
-      </el-input>
-      <el-button type="primary" @click="sendMessage" :disabled="!inputText.trim() || sending" class="send-btn">
+      <div class="input-toolbar">
+        <el-popover placement="top-start" :width="320" trigger="click">
+          <template #reference>
+            <el-button size="small" class="toolbar-btn" circle>
+              <el-icon><Smiley /></el-icon>
+            </el-button>
+          </template>
+          <div class="emoji-grid">
+            <span v-for="emoji in emojis" :key="emoji" class="emoji-item" @click="insertEmoji(emoji)">{{ emoji }}</span>
+          </div>
+        </el-popover>
+        <el-button size="small" class="toolbar-btn" circle @click="triggerUpload" :disabled="uploading">
+          <el-icon v-if="!uploading"><PictureFilled /></el-icon>
+          <el-icon v-else class="loading-icon"><Loading /></el-icon>
+        </el-button>
+        <input ref="fileInputRef" type="file" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp" style="display:none" @change="handleFileSelect" />
+      </div>
+      <el-input v-model="inputText" placeholder="输入消息..." @keyup.enter="sendMessage" class="message-input" :disabled="sending || uploading" ref="inputRef" />
+      <el-button type="primary" @click="sendMessage" :disabled="!inputText.trim() || sending || uploading" class="send-btn">
         <el-icon v-if="!sending"><Promotion /></el-icon>
         <el-icon v-else class="loading-icon"><Loading /></el-icon>
       </el-button>
@@ -72,7 +84,7 @@
 import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ArrowLeft, ChatLineRound, Promotion, Loading } from '@element-plus/icons-vue'
+import { ArrowLeft, ChatLineRound, Promotion, Loading, Smiley, PictureFilled } from '@element-plus/icons-vue'
 import request from '@/api/request'
 import { useUserStore } from '@/stores/user'
 
@@ -87,6 +99,69 @@ const myUserId = ref(null)
 const loading = ref(false)
 const sending = ref(false)
 const wsConnected = ref(false)
+const uploading = ref(false)
+const fileInputRef = ref(null)
+const inputRef = ref(null)
+
+const emojis = ['😀','😃','😄','😁','😆','😊','😍','😘','😗','😙','😔','😭','😂','😮','😢','😠','😒','😎','👍','👎','👏','👌','✌','✍','💯','💤','❤','💛','💚','💙','💜','💦','☀','🌟','🌍','💎','🎉','🎁','🎂','🍰','☕','🍵','🚀','✈','📱','💻','💬','📖']
+
+const isImage = (content) => {
+  return typeof content === 'string' && /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(content)
+}
+
+const insertEmoji = (emoji) => {
+  inputText.value += emoji
+  inputRef.value?.focus()
+}
+
+const triggerUpload = () => {
+  fileInputRef.value?.click()
+}
+
+const handleFileSelect = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+  event.target.value = ''
+  uploading.value = true
+  try {
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await request.post('/api/upload', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 30000,
+    })
+    if (res.code === 200) {
+      await sendImageMessage('http://localhost:8080' + res.data)
+    } else {
+      ElMessage.error(res.message || '上传失败')
+    }
+  } catch {
+    ElMessage.error('图片上传失败')
+  } finally {
+    uploading.value = false
+  }
+}
+
+const sendImageMessage = async (url) => {
+  const optimisticMsg = { id: 'temp-' + Date.now(), senderId: myUserId.value, content: url, createTime: new Date().toISOString() }
+  messages.value.push(optimisticMsg)
+  scrollToBottom()
+  if (wsSendMessage(url)) return
+  try {
+    const res = await request.post('/api/chat/send', { receiverId: Number(otherId.value), content: url })
+    if (res.code !== 200) {
+      const idx = messages.value.findIndex(m => m.id === optimisticMsg.id)
+      if (idx >= 0) messages.value.splice(idx, 1)
+    }
+  } catch {
+    const idx = messages.value.findIndex(m => m.id === optimisticMsg.id)
+    if (idx >= 0) messages.value.splice(idx, 1)
+  }
+}
+
+const previewImage = (url) => {
+  window.open(url, '_blank')
+}
 const otherId = computed(() => String(route.params.id))
 
 const wsUrl = computed(() => {
@@ -496,6 +571,58 @@ onUnmounted(() => {
 }
 
 /* ===== 响应式 ===== */
+
+/* ===== 输入工具栏 ===== */
+.input-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-self: flex-end;
+  padding-bottom: 4px;
+}
+.toolbar-btn {
+  border: none !important;
+  background: transparent !important;
+  color: #b8956e !important;
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+}
+.toolbar-btn:hover {
+  background: rgba(139,94,60,0.08) !important;
+  color: #8b5e3c !important;
+}
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  padding: 4px;
+}
+.emoji-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  padding: 4px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.emoji-item:hover {
+  background: #f0ebe4;
+}
+.msg-image {
+  max-width: 220px;
+  max-height: 260px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: block;
+  transition: transform 0.15s;
+}
+.msg-image:hover {
+  transform: scale(1.02);
+}
+
 @media (max-width: 768px) {
   .chat-room-container {
     padding: 0 10px 10px;
@@ -504,6 +631,7 @@ onUnmounted(() => {
   }
   .chat-header { padding: 10px 0; }
   .message-item { max-width: 90%; }
+  .msg-image { max-width: 160px; max-height: 200px; }
   .input-area { gap: 6px; }
 }
 </style>
