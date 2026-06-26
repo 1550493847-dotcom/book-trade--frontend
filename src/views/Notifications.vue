@@ -186,4 +186,12 @@ h2 {
 .empty {
   margin-top: 50px;
 }
+
+@media (max-width: 768px) {
+  .notifications-container { padding: 12px; }
+  .tabs-header { flex-direction: column; gap: 10px; }
+  .notification-item { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .notification-actions { width: 100%; display: flex; justify-content: flex-end; }
+}
+
 </style>

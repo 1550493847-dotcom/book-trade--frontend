@@ -123,4 +123,15 @@ h2 { margin-bottom: 20px; }
 .cart-summary { font-size: 14px; color: #666; }
 .total-price { color: #f56c6c; font-size: 18px; font-weight: bold; margin-left: 16px; }
 .empty { margin-top: 60px; }
+
+@media (max-width: 768px) {
+  .cart-container { padding: 12px; }
+  .item-content { gap: 10px; }
+  .item-image { width: 70px; }
+  .book-img { width: 70px; height: 70px; }
+  .item-actions { flex-direction: row; gap: 6px; }
+  .cart-footer { flex-direction: column; gap: 10px; align-items: stretch; }
+  .cart-summary { text-align: center; }
+}
+
 </style>

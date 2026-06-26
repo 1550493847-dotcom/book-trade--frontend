@@ -89,4 +89,9 @@ const submitReview = async () => {
   font-size: 18px;
   font-weight: bold;
 }
+
+@media (max-width: 768px) {
+  .review-container { padding: 12px; }
+}
+
 </style>

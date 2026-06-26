@@ -223,4 +223,16 @@ onMounted(() => {
 .empty {
   margin-top: 50px;
 }
+
+@media (max-width: 768px) {
+  .book-list { gap: 10px; }
+  .book-card { width: calc(50% - 5px); }
+  .book-card:hover { transform: none; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+  .filter-right { flex-direction: column; gap: 8px; }
+  .filter-select { width: 100%; }
+  .pagination { margin-top: 16px; }
+  .empty { margin-top: 30px; }
+}
+
 </style>

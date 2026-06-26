@@ -190,4 +190,14 @@ onMounted(() => {
   text-align: center;
   padding: 50px;
 }
+
+@media (max-width: 768px) {
+  .detail-container { padding: 12px; }
+  .detail-content { flex-direction: column; }
+  .detail-image-section { width: 100%; }
+  .detail-info-section { width: 100%; padding-left: 0; margin-top: 16px; }
+  .detail-img { height: 250px; }
+  .book-title { font-size: 20px; }
+}
+
 </style>

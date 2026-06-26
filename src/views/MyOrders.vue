@@ -226,4 +226,12 @@ h2 {
 .empty {
   margin-top: 50px;
 }
+
+@media (max-width: 768px) {
+  .orders-container { padding: 12px; }
+  .order-card { width: 100%; }
+  .order-card:hover { transform: none; }
+  .order-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+}
+
 </style>

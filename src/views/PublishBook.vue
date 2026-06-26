@@ -204,4 +204,10 @@ const resetForm = () => {
   color: #999;
   margin-top: 10px;
 }
+
+@media (max-width: 768px) {
+  .publish-container { padding: 12px; }
+  .publish-container .el-form-item { margin-bottom: 14px; }
+}
+
 </style>

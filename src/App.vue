@@ -20,11 +20,7 @@
 
           <!-- 右侧：导航链接 -->
           <div class="header-right">
-            <router-link to="/publish" class="nav-link nav-publish" :class="{ active: isActive('/publish') }" v-if="userStore.isLogin">
-              <el-icon><Plus /></el-icon>
-              发布商品
-            </router-link>
-            <!-- 未登录 -->
+<!-- 未登录 -->
             <template v-if="!userStore.isLogin">
               <router-link to="/login" class="nav-link" :class="{ active: isActive('/login') }">登录</router-link>
               <span class="nav-divider">/</span>
@@ -33,28 +29,16 @@
 
             <!-- 已登录 -->
             <template v-else>
-              <router-link to="/chat" class="nav-link" :class="{ active: isActive('/chat') }">
-                <el-icon><ChatLineRound /></el-icon>
-                消息
-              </router-link>
-              <router-link to="/favorites" class="nav-link" :class="{ active: isActive('/favorites') }">
-                <el-icon><ShoppingCart /></el-icon>
-                购物车
-              </router-link>
               <router-link to="/orders" class="nav-link" :class="{ active: isActive('/orders') }">
                 <el-icon><List /></el-icon>
                 我的订单
               </router-link>
-              <router-link to="/user-info" class="nav-link" :class="{ active: isActive('/user-info') }">
-                <el-icon><User /></el-icon>
-                个人中心
-              </router-link>
-              <el-dropdown trigger="click" @command="handleCommand">
-                <span class="user-trigger">
+              <el-dropdown trigger="hover" @command="handleCommand">
+                <router-link to="/user-info" class="user-trigger">
                   <el-avatar :size="28" :src="userStore.avatarUrl">{{ userStore.displayName.charAt(0) || '用' }}</el-avatar>
                   <span class="user-name">{{ userStore.displayName }}</span>
                   <el-icon><ArrowDown /></el-icon>
-                </span>
+                </router-link>
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item command="myBooks">卖家中心</el-dropdown-item>
@@ -88,6 +72,22 @@
       <main class="main-content">
         <router-view />
       </main>
+      <!-- ===== 右侧悬浮导航（已登录时显示） ===== -->
+      <div class="floating-nav" v-if="userStore.isLogin">
+        <router-link to="/publish" class="float-nav-item" :class="{ active: isActive('/publish') }">
+          <el-icon><Plus /></el-icon>
+          <span>发布</span>
+        </router-link>
+        <router-link to="/chat" class="float-nav-item" :class="{ active: isActive('/chat') }">
+          <el-icon><ChatLineRound /></el-icon>
+          <span>消息</span>
+        </router-link>
+        <router-link to="/favorites" class="float-nav-item" :class="{ active: isActive('/favorites') }">
+          <el-icon><ShoppingCart /></el-icon>
+          <span>购物车</span>
+        </router-link>
+      </div>
+
     </template>
   </div>
 </template>
@@ -150,8 +150,6 @@ onMounted(() => { userStore.refreshFromStorage() })
 body { background: #f5f0eb; }
 
 .top-header {
-  position: sticky;
-  top: 0;
   z-index: 1001;
   background: linear-gradient(135deg, #3d2413 0%, #6d4526 50%, #8b5e3c 100%);
   box-shadow: 0 2px 12px rgba(0,0,0,0.12);
@@ -224,7 +222,7 @@ body { background: #f5f0eb; }
 
 .search-section {
   position: sticky;
-  top: 58px;
+  top: 0;
   z-index: 1000;
   background: #f5f0eb;
   padding: 14px 20px;
@@ -271,14 +269,13 @@ body { background: #f5f0eb; }
 .main-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 20px 80px;
   min-height: calc(100vh - 58px - 74px);
 }
-.nav-publish {
-  gap: 5px;
-  padding: 7px 16px !important;
-}
 
+@media (max-width: 768px) {
+  .main-content { padding: 12px; min-height: calc(100vh - 58px - 74px); }
+}
 /* ===== 导航按钮高亮（白色底色） ===== */
 .nav-link.active {
   background: rgba(255,255,255,0.18);
@@ -288,4 +285,93 @@ body { background: #f5f0eb; }
 .nav-link.active .el-icon {
   color: #fff;
 }
+
+/* ===== 右侧悬浮导航 ===== */
+.floating-nav {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 14px;
+  padding: 8px 6px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.04);
+}
+.float-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 10px;
+  color: #6d4526;
+  text-decoration: none;
+  font-size: 11px;
+  border-radius: 10px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.float-nav-item:hover {
+  background: rgba(109,69,38,0.08);
+  color: #3d2413;
+}
+.float-nav-item .el-icon {
+  font-size: 20px;
+}
+.float-nav-item.active {
+  background: rgba(109,69,38,0.12);
+  color: #3d2413;
+  font-weight: 600;
+}
+.float-nav-item.active .el-icon {
+  color: #8b5e3c;
+}
+
+
+/* ===== 全局响应式 ===== */
+@media (max-width: 768px) {
+  .header-inner { padding: 0 12px; }
+  .brand-name { font-size: 16px; letter-spacing: 2px; }
+  .search-section { padding: 10px 12px; }
+  .search-input { padding: 8px 10px; font-size: 13px; }
+  .search-btn { padding: 8px 18px !important; font-size: 13px; }
+
+  /* 导航链接：小屏只显示图标 */
+  .nav-link span { display: none; }
+  .nav-link { padding: 7px 8px; }
+
+  /* 浮动导航 → 底部标签栏 */
+  .floating-nav {
+    position: fixed;
+    right: auto;
+    bottom: 0;
+    left: 0;
+    top: auto;
+    transform: none;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+    border-radius: 14px 14px 0 0;
+    padding: 6px 0;
+    padding-bottom: env(safe-area-inset-bottom, 6px);
+    z-index: 1002;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.10);
+  }
+  .float-nav-item {
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+  .float-nav-item .el-icon { font-size: 22px; }
+
+  /* 页面主体下边距，避免被底部导航遮挡 */
+  .main-content { padding-bottom: 70px; }
+
+  .nav-divider { margin: 0 2px; }
+}
+
 </style>

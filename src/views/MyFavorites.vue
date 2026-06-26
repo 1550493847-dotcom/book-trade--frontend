@@ -154,4 +154,13 @@ h2 {
 .empty {
   margin-top: 50px;
 }
+
+@media (max-width: 768px) {
+  .favorites-container { padding: 12px; }
+  .book-list { gap: 10px; }
+  .book-card { width: calc(50% - 5px); }
+  .book-card:hover { transform: none; }
+  .empty { margin-top: 30px; }
+}
+
 </style>

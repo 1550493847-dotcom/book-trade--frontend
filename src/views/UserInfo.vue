@@ -211,4 +211,10 @@ onMounted(() => {
   margin-bottom: 8px;
   display: block;
 }
+
+@media (max-width: 768px) {
+  .user-info-container { padding: 12px; }
+  .avatar-section { flex-direction: column; text-align: center; }
+}
+
 </style>

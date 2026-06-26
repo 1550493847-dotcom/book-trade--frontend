@@ -240,4 +240,12 @@ onUnmounted(() => {
 .message-input {
   flex: 1;
 }
+
+@media (max-width: 768px) {
+  .chat-room-container { padding: 0 10px 10px; }
+  .chat-header { padding: 10px 0; }
+  .message-bubble { max-width: 80%; }
+  .input-area { gap: 6px; }
+}
+
 </style>

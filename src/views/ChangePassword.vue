@@ -110,4 +110,9 @@ const submit = async () => {
   font-size: 18px;
   font-weight: bold;
 }
+
+@media (max-width: 768px) {
+  .change-password-container { padding: 12px; }
+}
+
 </style>

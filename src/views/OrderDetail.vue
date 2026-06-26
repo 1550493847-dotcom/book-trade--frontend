@@ -326,4 +326,12 @@ onMounted(() => {
   padding: 50px;
   color: #999;
 }
+
+@media (max-width: 768px) {
+  .order-detail-container { padding: 12px; }
+  .order-info-card { flex-direction: column; }
+  .book-info { flex-direction: column; align-items: flex-start; }
+  .book-img { width: 100%; height: 200px; }
+}
+
 </style>

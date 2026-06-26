@@ -131,4 +131,11 @@ h2 {
 .empty {
   margin-top: 50px;
 }
+
+@media (max-width: 768px) {
+  .chat-list-container { padding: 12px; }
+  .chat-card:hover { transform: none; }
+  .chat-preview { max-width: 160px; }
+}
+
 </style>
