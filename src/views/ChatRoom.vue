@@ -59,7 +59,7 @@
         <el-popover placement="top-start" :width="320" trigger="click">
           <template #reference>
             <el-button size="small" class="toolbar-btn" circle>
-              <el-icon><Smiley /></el-icon>
+              <el-icon><ChatDotSquare /></el-icon>
             </el-button>
           </template>
           <div class="emoji-grid">
@@ -84,7 +84,7 @@
 import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ArrowLeft, ChatLineRound, Promotion, Loading, Smiley, PictureFilled } from '@element-plus/icons-vue'
+import { ArrowLeft, ChatLineRound, Promotion, Loading, ChatDotSquare, PictureFilled } from '@element-plus/icons-vue'
 import request from '@/api/request'
 import { useUserStore } from '@/stores/user'
 
