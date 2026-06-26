@@ -169,6 +169,12 @@ const sendMessage = async () => {
 }
 
 onMounted(async () => {
+  // 检查 otherId 是否有效
+  if (!otherId.value || otherId.value === 'undefined' || otherId.value === 'null') {
+    ElMessage.warning('无效的对话')
+    router.push('/chat')
+    return
+  }
   if (userStore.userInfo?.id) {
     myUserId.value = userStore.userInfo.id
   }

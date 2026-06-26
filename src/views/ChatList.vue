@@ -70,7 +70,7 @@ const loadChats = async () => {
 }
 
 const goToChat = (chat) => {
-  router.push(`/chat/${chat.otherUserId || chat.id}`)
+  router.push(`/chat/${chat.otherUserId || chat.otherId || chat.id}`)
 }
 
 onMounted(() => {
