@@ -23,32 +23,45 @@
         </div>
 
         <div :class="['message-item', msg.senderId === myUserId ? 'mine' : 'other']">
-          <!-- 自己头像（右侧） -->
-          <el-avatar v-if="msg.senderId === myUserId" :size="36" class="msg-avatar" :src="userStore.avatarUrl">
-            {{ (userStore.displayName || '我').charAt(0) }}
-          </el-avatar>
-
-          <div class="message-content">
-            <div class="message-bubble">
-              <template v-if="isImage(msg.content)">
-                <img :src="msg.content" class="msg-image" @click="previewImage(msg.content)" @load="scrollToBottom" />
-              </template>
-              <template v-else>
-                <div class="message-text">{{ msg.content }}</div>
-              </template>
+          <!-- 自己：内容在左 头像在右 -->
+          <template v-if="msg.senderId === myUserId">
+            <div class="message-content">
+              <div class="message-bubble">
+                <template v-if="isImage(msg.content)">
+                  <img :src="msg.content" class="msg-image" @click="previewImage(msg.content)" @load="scrollToBottom" />
+                </template>
+                <template v-else>
+                  <div class="message-text">{{ msg.content }}</div>
+                </template>
+              </div>
+              <div class="message-meta">
+                <span class="message-time">{{ formatTime(msg.createTime) }}</span>
+                <el-icon v-if="String(msg.id).startsWith('temp-')" class="status-icon sending"><Loading /></el-icon>
+              </div>
             </div>
-            <div class="message-meta">
-              <span class="message-time">{{ formatTime(msg.createTime) }}</span>
-              <el-icon v-if="msg.senderId === myUserId && String(msg.id).startsWith('temp-')" class="status-icon sending">
-                <Loading />
-              </el-icon>
+            <el-avatar :size="36" class="msg-avatar" :src="userStore.avatarUrl">
+              {{ (userStore.displayName || '我').charAt(0) }}
+            </el-avatar>
+          </template>
+          <!-- 对方：头像在左 内容在右 -->
+          <template v-else>
+            <el-avatar :size="36" class="msg-avatar">
+              {{ (otherName || '用').charAt(0) }}
+            </el-avatar>
+            <div class="message-content">
+              <div class="message-bubble">
+                <template v-if="isImage(msg.content)">
+                  <img :src="msg.content" class="msg-image" @click="previewImage(msg.content)" @load="scrollToBottom" />
+                </template>
+                <template v-else>
+                  <div class="message-text">{{ msg.content }}</div>
+                </template>
+              </div>
+              <div class="message-meta">
+                <span class="message-time">{{ formatTime(msg.createTime) }}</span>
+              </div>
             </div>
-          </div>
-
-          <!-- 对方头像（左侧） -->
-          <el-avatar v-if="msg.senderId !== myUserId" :size="36" class="msg-avatar">
-            {{ (otherName || '用').charAt(0) }}
-          </el-avatar>
+          </template>
         </div>
       </template>
     </div>
