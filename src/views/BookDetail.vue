@@ -1,6 +1,38 @@
-<template>
+﻿<template>
   <div class="detail-container">
-    <el-card v-if="book">
+    <el-card v-if="book" class="book-card">
+      <!-- ===== 卖家信息区域 ===== -->
+      <div class="seller-section" v-if="seller">
+        <div class="seller-avatar-area">
+          <el-avatar :size="56" :src="sellerAvatar">{{ sellerNickname.charAt(0) }}</el-avatar>
+          <div class="seller-name-area">
+            <span class="seller-nickname">{{ sellerNickname }}</span>
+            <span class="seller-role">卖家</span>
+          </div>
+        </div>
+        <div class="seller-meta">
+          <span class="meta-item">
+            <span class="meta-icon">🕐</span>
+            {{ onlineStatus }}
+          </span>
+          <span class="meta-item">
+            <span class="meta-icon">📍</span>
+            IP：{{ sellerIp }}
+          </span>
+          <span class="meta-item">
+            <span class="meta-icon">📅</span>
+            来淘籍籍 {{ yearsOnPlatform }} 年
+          </span>
+          <span class="meta-item">
+            <span class="meta-icon">📦</span>
+            已售 {{ sellerSoldCount }} 件
+          </span>
+        </div>
+      </div>
+
+      <el-divider />
+      
+      <!-- ===== 图书详情区域 ===== -->
       <div class="book-detail">
         <div class="images">
           <el-carousel height="400px" v-if="imageList.length > 0">
@@ -19,7 +51,6 @@
           <p class="original-price"><strong>原价：</strong>¥{{ book.originalPrice }}</p>
           <p><strong>描述：</strong>{{ book.description || '暂无描述' }}</p>
           <p><strong>浏览量：</strong>{{ book.viewCount || 0 }}</p>
-          <p><strong>卖家：</strong>{{ book.sellerName || book.seller?.nickname || book.seller?.username || book.nickname || book.username || '未知' }}</p>
           
           <div class="actions">
             <el-button type="primary" @click="buyNow">立即购买</el-button>
@@ -38,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import request from '@/api/request'
@@ -50,6 +81,7 @@ const router = useRouter()
 const userStore = useUserStore()
 const cartStore = useCartStore()
 const book = ref(null)
+const seller = ref(null)
 const imageList = ref([])
 const cartInStore = ref(false)
 
@@ -59,14 +91,68 @@ const getImageUrl = (path) => {
   return 'http://localhost:8080' + path
 }
 
+// 卖家头像
+const sellerAvatar = computed(() => {
+  if (!seller.value) return ''
+  const avatar = seller.value.avatar
+  if (!avatar) return ''
+  if (avatar.startsWith('http')) return avatar
+  return 'http://localhost:8080' + avatar
+})
+
+// 卖家昵称
+const sellerNickname = computed(() => {
+  return seller.value?.nickname || seller.value?.username || '未知'
+})
+
+// 在线状态
+const onlineStatus = computed(() => {
+  if (!seller.value?.lastLoginTime) return '暂无在线记录'
+  const lastTime = new Date(seller.value.lastLoginTime)
+  const now = new Date()
+  const diffMs = now - lastTime
+  const diffMin = Math.floor(diffMs / 60000)
+  if (diffMin < 5) return '刚刚在线'
+  if (diffMin < 60) return `${diffMin} 分钟前在线`
+  const diffHour = Math.floor(diffMin / 60)
+  if (diffHour < 24) return `${diffHour} 小时前在线`
+  const diffDay = Math.floor(diffHour / 24)
+  return `${diffDay} 天前在线`
+})
+
+// 卖家 IP
+const sellerIp = computed(() => {
+  return seller.value?.lastLoginIp || '未知'
+})
+
+// 来淘籍籍多少年
+const yearsOnPlatform = computed(() => {
+  if (!seller.value?.createTime) return '未知'
+  const createTime = new Date(seller.value.createTime)
+  const now = new Date()
+  const diffYears = (now - createTime) / (365.25 * 24 * 60 * 60 * 1000)
+  if (diffYears < 1) {
+    const diffMonths = Math.floor(diffYears * 12)
+    return diffMonths < 1 ? '不到 1' : diffMonths
+  }
+  return Math.floor(diffYears)
+})
+
+// 已售数量
+const sellerSoldCount = computed(() => {
+  return seller.value?.soldCount ?? 0
+})
+
 const loadBook = async () => {
   const id = route.params.id
   try {
     const res = await request.get(`/api/book/${id}`)
     if (res.code === 200) {
-      book.value = res.data
-      if (book.value.images) {
-        imageList.value = book.value.images.split(',')
+      const data = res.data
+      book.value = data
+      seller.value = data.seller || null
+      if (data.images) {
+        imageList.value = data.images.split(',')
       }
     } else {
       ElMessage.error('商品不存在')
@@ -102,7 +188,7 @@ const addToCart = () => {
 
 const goChat = () => {
   if (!checkLogin()) return
-  const sid = book.value.sellerId || book.value.userId || book.value.seller?.id
+  const sid = seller.value?.id || book.value?.userId
   if (sid) {
     router.push(`/chat/${sid}`)
   } else {
@@ -145,6 +231,74 @@ onMounted(() => {
   max-width: 1200px;
   margin: 0 auto;
 }
+
+.book-card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* ===== 卖家信息区域 ===== */
+.seller-section {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #faf6f0 0%, #f5f0eb 100%);
+  border-radius: 10px;
+  border: 1px solid #e8ddd0;
+  flex-wrap: wrap;
+}
+
+.seller-avatar-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.seller-name-area {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.seller-nickname {
+  font-size: 16px;
+  font-weight: 600;
+  color: #3d2413;
+}
+
+.seller-role {
+  font-size: 12px;
+  color: #a0712a;
+  background: #f0e6d6;
+  padding: 1px 8px;
+  border-radius: 10px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.seller-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  flex: 1;
+}
+
+.meta-item {
+  font-size: 13px;
+  color: #6b5a4a;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.meta-icon {
+  font-size: 14px;
+}
+
+/* ===== 图书详情 ===== */
 .book-detail {
   display: flex;
   gap: 40px;
@@ -194,11 +348,11 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .detail-container { padding: 12px; }
-  .detail-content { flex-direction: column; }
-  .detail-image-section { width: 100%; }
-  .detail-info-section { width: 100%; padding-left: 0; margin-top: 16px; }
+  .seller-section { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .seller-meta { gap: 8px; }
+  .book-detail { flex-direction: column; }
+  .images { width: 100%; }
+  .info { width: 100%; }
   .detail-img { height: 250px; }
-  .book-title { font-size: 20px; }
 }
-
 </style>
