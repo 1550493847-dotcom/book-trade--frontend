@@ -86,17 +86,20 @@
             </div>
           </div>
           
-          <!-- 操作按钮 -->
-          <div class="actions">
-            <div class="buy-group">
-              <button class="buy-btn" @click="buyNow">立即购买</button>
-              <span class="btn-divider"></span>
-              <button class="chat-btn" @click="goChat">联系卖家</button>
-            </div>
-            <el-button class="cart-btn" @click="addToCart" :disabled="cartInStore">
-              {{ cartInStore ? "已在购物车" : "加入购物车" }}
-            </el-button>
+        </div>
+      </div>
+
+      <!-- ===== 底部操作按钮 ===== -->
+      <div class="card-actions">
+        <div class="actions-inner">
+          <div class="buy-group">
+            <button class="buy-btn" @click="buyNow">立即购买</button>
+            <span class="btn-divider"></span>
+            <button class="chat-btn" @click="goChat">联系卖家</button>
           </div>
+          <el-button class="cart-btn" @click="addToCart" :disabled="cartInStore">
+            {{ cartInStore ? "已在购物车" : "加入购物车" }}
+          </el-button>
         </div>
       </div>
     </el-card>
@@ -487,9 +490,15 @@ onMounted(() => {
   color: #999;
 }
 
-/* ===== 操作按钮 ===== */
-.actions {
-  margin-top: 24px;
+/* ===== 底部操作按钮 ===== */
+.card-actions {
+  border-top: 1px solid #eee;
+  padding: 16px 20px;
+  margin-top: 20px;
+  background: #faf8f5;
+}
+
+.actions-inner {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -578,7 +587,7 @@ onMounted(() => {
   .info { width: 100%; }
   .detail-img { height: 250px; }
   .params-grid { grid-template-columns: 1fr; }
-  .actions { gap: 8px; }
+  .actions-inner { gap: 8px; }
   .fav-btn { margin-left: 0; }
 }
 </style>
