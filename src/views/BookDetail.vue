@@ -290,7 +290,7 @@ onMounted(() => {
   border-radius: 50px !important;
   padding: 6px 16px !important;
   font-size: 13px !important;
-  background: #f5f0eb !important;
+  background: #ede6dc !important;
   border-color: #d0c0b0 !important;
   color: #6b5a4a !important;
 }
@@ -315,7 +315,7 @@ onMounted(() => {
 .seller-home-btn {
   margin-left: auto;
   flex-shrink: 0;
-  background: #fff !important;
+  background: #ede6dc !important;
   border-color: #d0c0b0 !important;
   color: #6b5a4a !important;
   font-size: 13px;
@@ -544,7 +544,7 @@ onMounted(() => {
   font-size: 14px !important;
   line-height: 1 !important;
   height: 40px !important;
-  background: #fff !important;
+  background: #ede6dc !important;
   border-color: #d0c0b0 !important;
   color: #6b5a4a !important;
   margin-left: auto;
@@ -557,7 +557,7 @@ onMounted(() => {
 }
 
 .cart-btn.is-disabled {
-  background: #f5f0eb !important;
+  background: #ede6dc !important;
   border-color: #ddd !important;
   color: #bbb !important;
 }
