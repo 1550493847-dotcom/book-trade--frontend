@@ -1,6 +1,11 @@
 <template>
   <div class="detail-container">
     <el-card v-if="book" class="book-card">
+      <!-- ===== 返回按钮 ===== -->
+      <div class="back-top">
+        <el-button class="back-btn" plain @click="goBack">&larr; 返回</el-button>
+      </div>
+
       <!-- ===== 卖家信息区域 ===== -->
       <div class="seller-section" v-if="seller">
         <div class="seller-avatar-area">
@@ -276,6 +281,26 @@ onMounted(() => {
   overflow: hidden;
 }
 
+/* ===== 顶部返回按钮 ===== */
+.back-top {
+  margin-bottom: 12px;
+}
+
+.back-btn {
+  border-radius: 50px !important;
+  padding: 6px 16px !important;
+  font-size: 13px !important;
+  background: #f5f0eb !important;
+  border-color: #d0c0b0 !important;
+  color: #6b5a4a !important;
+}
+
+.back-btn:hover {
+  border-color: #a0712a !important;
+  color: #a0712a !important;
+  background: #ede6dc !important;
+}
+
 /* ===== 卖家信息区域 ===== */
 .seller-section {
   display: flex;
@@ -487,6 +512,8 @@ onMounted(() => {
   font-size: 14px;
   font-weight: 500;
   padding: 10px 22px;
+  line-height: 1;
+  height: 40px;
   transition: opacity 0.2s;
   color: #fff;
   letter-spacing: 0.5px;
@@ -515,6 +542,8 @@ onMounted(() => {
   border-radius: 50px !important;
   padding: 10px 22px !important;
   font-size: 14px !important;
+  line-height: 1 !important;
+  height: 40px !important;
   background: #fff !important;
   border-color: #d0c0b0 !important;
   color: #6b5a4a !important;
