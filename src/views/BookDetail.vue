@@ -18,7 +18,7 @@
             <span class="meta-item">已售 {{ sellerSoldCount }} 件</span>
           </div>
         </div>
-        <el-button class="seller-home-btn" size="small" plain @click="goSellerHome">卖家主页</el-button>
+        <el-button class="seller-home-btn" plain @click="goSellerHome">卖家主页</el-button>
       </div>
 
       <el-divider />
