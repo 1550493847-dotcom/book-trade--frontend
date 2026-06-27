@@ -89,17 +89,17 @@
         </div>
       </div>
 
-      <!-- ===== 底部操作按钮 ===== -->
-      <div class="card-actions">
-        <div class="actions-inner">
-          <div class="buy-group">
-            <button class="buy-btn" @click="buyNow">立即购买</button>
-            <span class="btn-divider"></span>
-            <button class="chat-btn" @click="goChat">联系卖家</button>
+          <!-- ===== 操作按钮 ===== -->
+          <div class="actions-inner">
+            <div class="buy-group">
+              <button class="buy-btn" @click="buyNow">立即购买</button>
+              <span class="btn-divider"></span>
+              <button class="chat-btn" @click="goChat">联系卖家</button>
+            </div>
+            <el-button class="cart-btn" @click="addToCart" :disabled="cartInStore">
+              {{ cartInStore ? "已在购物车" : "加入购物车" }}
+            </el-button>
           </div>
-          <el-button class="cart-btn" @click="addToCart" :disabled="cartInStore">
-            {{ cartInStore ? "已在购物车" : "加入购物车" }}
-          </el-button>
         </div>
       </div>
     </el-card>
@@ -382,6 +382,8 @@ onMounted(() => {
 .info {
   flex: 1;
   min-width: 300px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 价格 */
@@ -490,19 +492,15 @@ onMounted(() => {
   color: #999;
 }
 
-/* ===== 底部操作按钮 ===== */
-.card-actions {
-  border-top: 1px solid #eee;
-  padding: 16px 20px;
-  margin-top: 20px;
-  background: #faf8f5;
-}
-
+/* ===== 操作按钮 ===== */
 .actions-inner {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
 }
 
 /* 立即购买 + 联系卖家 组合按钮 */
