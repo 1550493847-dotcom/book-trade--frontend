@@ -1,11 +1,11 @@
 <template>
   <div class="detail-container">
-    <el-card v-if="book" class="book-card">
-      <!-- ===== 返回按钮 ===== -->
+      <!-- ===== 返回按钮（卡片外） ===== -->
       <div class="back-top">
         <el-button class="back-btn" plain @click="goBack">&larr; 返回</el-button>
       </div>
 
+    <el-card v-if="book" class="book-card">
       <!-- ===== 卖家信息区域 ===== -->
       <div class="seller-section" v-if="seller">
         <div class="seller-avatar-area">
