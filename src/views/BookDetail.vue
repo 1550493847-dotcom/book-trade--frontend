@@ -35,13 +35,55 @@
         </div>
         
         <div class="info">
-          <h2>{{ book.title }}</h2>
-          <p><strong>作者：</strong>{{ book.author || '未知' }}</p>
-          <p><strong>分类：</strong>{{ book.category || '未分类' }}</p>
-          <p class="price"><strong>售价：</strong>¥{{ book.sellPrice }}</p>
-          <p class="original-price"><strong>原价：</strong>¥{{ book.originalPrice }}</p>
-          <p><strong>描述：</strong>{{ book.description || '暂无描述' }}</p>
-          <p><strong>浏览量：</strong>{{ book.viewCount || 0 }}</p>
+          <!-- 价格 + 包邮 -->
+          <div class="price-row">
+            <span class="price">¥{{ book.sellPrice }}</span>
+            <span class="shipping-tag">包邮</span>
+          </div>
+          
+          <!-- 原价 -->
+          <div class="original-price-row" v-if="book.originalPrice">
+            原价 ¥{{ book.originalPrice }}
+          </div>
+          
+          <!-- 浏览 + 退货 -->
+          <div class="meta-row">
+            <span class="view-count">{{ book.viewCount || 0 }}浏览</span>
+            <span class="return-policy">描述不符包邮退</span>
+          </div>
+          
+          <!-- 详细描述 -->
+          <div class="desc-section">
+            <div class="section-label">详细描述</div>
+            <div class="desc-text">{{ book.description || '暂无描述' }}</div>
+          </div>
+          
+          <!-- 图书参数 -->
+          <div class="params-section">
+            <div class="section-label">图书参数</div>
+            <table class="params-table">
+              <tr>
+                <td class="param-label">ISBN编号：</td>
+                <td class="param-value">{{ book.isbn || '暂无' }}</td>
+              </tr>
+              <tr>
+                <td class="param-label">书名：</td>
+                <td class="param-value">{{ book.title }}</td>
+              </tr>
+              <tr>
+                <td class="param-label">作者：</td>
+                <td class="param-value">{{ book.author || '暂无' }}</td>
+              </tr>
+              <tr>
+                <td class="param-label">出版社：</td>
+                <td class="param-value">{{ book.publisher || '暂无' }}</td>
+              </tr>
+              <tr>
+                <td class="param-label">成色：</td>
+                <td class="param-value">{{ book.bookCondition || '暂无' }}</td>
+              </tr>
+            </table>
+          </div>
           
           <div class="actions">
             <el-button type="primary" @click="buyNow">立即购买</el-button>
@@ -313,14 +355,88 @@ onMounted(() => {
   flex: 1;
   min-width: 300px;
 }
+.price-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
 .price {
   color: #f56c6c;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
 }
-.original-price {
-  text-decoration: line-through;
+.shipping-tag {
+  display: inline-block;
+  background: #f56c6c;
+  color: #fff;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.original-price-row {
+  font-size: 14px;
   color: #999;
+  text-decoration: line-through;
+  margin-bottom: 10px;
+}
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eee;
+}
+.view-count {
+  font-size: 13px;
+  color: #666;
+}
+.return-policy {
+  font-size: 12px;
+  color: #f56c6c;
+  border: 1px solid #f56c6c;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.section-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #3d2413;
+  margin-bottom: 8px;
+  padding-left: 8px;
+  border-left: 3px solid #a0712a;
+}
+.desc-section {
+  margin-bottom: 20px;
+}
+.desc-text {
+  font-size: 14px;
+  color: #444;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.params-section {
+  margin-bottom: 20px;
+}
+.params-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.params-table tr {
+  border-bottom: 1px dashed #eee;
+}
+.params-table td {
+  padding: 8px 4px;
+  font-size: 14px;
+}
+.param-label {
+  color: #888;
+  width: 100px;
+  white-space: nowrap;
+}
+.param-value {
+  color: #333;
 }
 .detail-img {
   width: 100%;
