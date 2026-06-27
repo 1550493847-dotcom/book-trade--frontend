@@ -1,9 +1,9 @@
 <template>
   <div class="detail-container">
-      <!-- ===== 返回按钮（卡片外） ===== -->
-      <div class="back-top">
-        <el-button class="back-btn" plain @click="goBack">&larr; 返回</el-button>
-      </div>
+    <!-- ===== 返回按钮（卡片外） ===== -->
+    <div class="back-top">
+      <el-button class="back-btn" plain @click="goBack">&larr; 返回</el-button>
+    </div>
 
     <el-card v-if="book" class="book-card">
       <!-- ===== 卖家信息区域 ===== -->
@@ -86,9 +86,6 @@
             </div>
           </div>
           
-        </div>
-      </div>
-
           <!-- ===== 操作按钮 ===== -->
           <div class="actions-inner">
             <div class="buy-group">
@@ -125,14 +122,12 @@ const seller = ref(null)
 const imageList = ref([])
 const cartInStore = ref(false)
 
-
 const getImageUrl = (path) => {
   if (!path) return ""
   if (path.startsWith("http")) return path
   return "http://localhost:8080" + path
 }
 
-// 卖家头像
 const sellerAvatar = computed(() => {
   if (!seller.value) return ""
   const avatar = seller.value.avatar
@@ -141,12 +136,10 @@ const sellerAvatar = computed(() => {
   return "http://localhost:8080" + avatar
 })
 
-// 卖家昵称
 const sellerNickname = computed(() => {
   return seller.value?.nickname || seller.value?.username || "未知"
 })
 
-// 在线状态
 const onlineStatus = computed(() => {
   if (!seller.value?.lastLoginTime) return "暂无在线记录"
   const lastTime = new Date(seller.value.lastLoginTime)
@@ -161,12 +154,10 @@ const onlineStatus = computed(() => {
   return diffDay + " 天前在线"
 })
 
-// 卖家 IP
 const sellerIp = computed(() => {
   return seller.value?.lastLoginIp || "未知"
 })
 
-// 来淘籍籍多少年
 const yearsOnPlatform = computed(() => {
   if (!seller.value?.createTime) return "未知"
   const createTime = new Date(seller.value.createTime)
@@ -179,7 +170,6 @@ const yearsOnPlatform = computed(() => {
   return Math.floor(diffYears)
 })
 
-// 已售数量
 const sellerSoldCount = computed(() => {
   return seller.value?.soldCount ?? 0
 })
@@ -217,7 +207,6 @@ const checkLogin = () => {
 const addToCart = () => {
   if (!checkLogin()) return
   if (!book.value) return
-
   const ok = cartStore.addItem(book.value)
   if (ok) {
     cartInStore.value = true
@@ -239,11 +228,8 @@ const goChat = () => {
 
 const buyNow = async () => {
   if (!checkLogin()) return
-  
   try {
-    const res = await request.post("/api/order/create", {
-      bookId: book.value.id
-    })
+    const res = await request.post("/api/order/create", { bookId: book.value.id })
     if (res.code === 200) {
       ElMessage.success("订单创建成功")
       router.push("/orders")
@@ -293,7 +279,7 @@ onMounted(() => {
   border-radius: 50px !important;
   padding: 6px 16px !important;
   font-size: 13px !important;
-  background: #ede6dc !important;
+  background: #f5f0eb !important;
   border-color: #d0c0b0 !important;
   color: #6b5a4a !important;
 }
@@ -318,7 +304,7 @@ onMounted(() => {
 .seller-home-btn {
   margin-left: auto;
   flex-shrink: 0;
-  background: #ede6dc !important;
+  background: #fff !important;
   border-color: #d0c0b0 !important;
   color: #6b5a4a !important;
   font-size: 13px;
@@ -551,7 +537,7 @@ onMounted(() => {
   font-size: 14px !important;
   line-height: 1 !important;
   height: 40px !important;
-  background: #ede6dc !important;
+  background: #f5f0eb !important;
   border-color: #d0c0b0 !important;
   color: #6b5a4a !important;
   margin-left: auto;
@@ -560,17 +546,14 @@ onMounted(() => {
 .cart-btn:hover {
   border-color: #a0712a !important;
   color: #a0712a !important;
-  background: #faf6f0 !important;
+  background: #ede6dc !important;
 }
 
 .cart-btn.is-disabled {
-  background: #ede6dc !important;
+  background: #e8ddd0 !important;
   border-color: #ddd !important;
   color: #bbb !important;
 }
-
-/* 收藏按钮 */
-
 
 .loading {
   text-align: center;
@@ -586,6 +569,5 @@ onMounted(() => {
   .detail-img { height: 250px; }
   .params-grid { grid-template-columns: 1fr; }
   .actions-inner { gap: 8px; }
-  .fav-btn { margin-left: 0; }
 }
 </style>
