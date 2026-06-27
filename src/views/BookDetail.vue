@@ -88,11 +88,8 @@
               <span class="btn-divider"></span>
               <button class="chat-btn" @click="goChat">联系卖家</button>
             </div>
-            <el-button type="warning" @click="addToCart" :disabled="cartInStore" class="cart-btn">
+            <el-button class="cart-btn" @click="addToCart" :disabled="cartInStore">
               {{ cartInStore ? "已在购物车" : "加入购物车" }}
-            </el-button>
-            <el-button class="fav-btn" :class="{ favorited: isFavorited }" @click="toggleFavorite">
-              {{ isFavorited ? "&#9829; 已收藏" : "&#9825; 收藏" }}
             </el-button>
           </div>
         </div>
@@ -119,7 +116,7 @@ const book = ref(null)
 const seller = ref(null)
 const imageList = ref([])
 const cartInStore = ref(false)
-const isFavorited = ref(false)
+
 
 const getImageUrl = (path) => {
   if (!path) return ""
@@ -178,42 +175,6 @@ const yearsOnPlatform = computed(() => {
 const sellerSoldCount = computed(() => {
   return seller.value?.soldCount ?? 0
 })
-
-const checkFavorite = async () => {
-  try {
-    const res = await request.get("/api/favorite/check/" + route.params.id)
-    if (res.code === 200) {
-      isFavorited.value = res.data
-    }
-  } catch (e) {
-    // 未登录或错误时默认 false
-  }
-}
-
-const toggleFavorite = async () => {
-  if (!userStore.isLogin) {
-    ElMessage.warning("请先登录")
-    router.push("/login?redirect=" + route.fullPath)
-    return
-  }
-  try {
-    if (isFavorited.value) {
-      const res = await request.delete("/api/favorite/book/" + route.params.id)
-      if (res.code === 200) {
-        isFavorited.value = false
-        ElMessage.success("已取消收藏")
-      }
-    } else {
-      const res = await request.post("/api/favorite/add", { bookId: book.value.id })
-      if (res.code === 200) {
-        isFavorited.value = true
-        ElMessage.success("已收藏")
-      }
-    }
-  } catch (e) {
-    ElMessage.error("操作失败")
-  }
-}
 
 const loadBook = async () => {
   const id = route.params.id
@@ -300,7 +261,6 @@ const goBack = () => {
 onMounted(() => {
   loadBook()
   cartInStore.value = cartStore.hasItem(Number(route.params.id))
-  checkFavorite()
 })
 </script>
 
@@ -555,30 +515,26 @@ onMounted(() => {
   border-radius: 50px !important;
   padding: 10px 22px !important;
   font-size: 14px !important;
-}
-
-/* 收藏按钮 */
-.fav-btn {
-  border-radius: 50px !important;
-  padding: 10px 20px !important;
-  font-size: 14px !important;
   background: #fff !important;
   border-color: #d0c0b0 !important;
-  color: #8a7a6a !important;
+  color: #6b5a4a !important;
   margin-left: auto;
 }
 
-.fav-btn:hover {
-  border-color: #f56c6c !important;
-  color: #f56c6c !important;
-  background: #fff5f5 !important;
+.cart-btn:hover {
+  border-color: #a0712a !important;
+  color: #a0712a !important;
+  background: #faf6f0 !important;
 }
 
-.fav-btn.favorited {
-  border-color: #f56c6c !important;
-  color: #f56c6c !important;
-  background: #fff5f5 !important;
+.cart-btn.is-disabled {
+  background: #f5f0eb !important;
+  border-color: #ddd !important;
+  color: #bbb !important;
 }
+
+/* 收藏按钮 */
+
 
 .loading {
   text-align: center;
