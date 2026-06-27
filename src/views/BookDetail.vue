@@ -1,32 +1,22 @@
-﻿<template>
+<template>
   <div class="detail-container">
     <el-card v-if="book" class="book-card">
       <!-- ===== 卖家信息区域 ===== -->
       <div class="seller-section" v-if="seller">
         <div class="seller-avatar-area">
-          <el-avatar :size="56" :src="sellerAvatar">{{ sellerNickname.charAt(0) }}</el-avatar>
-          <div class="seller-name-area">
-            <span class="seller-nickname">{{ sellerNickname }}</span>
-            <span class="seller-role">卖家</span>
-          </div>
+          <el-avatar :size="48" :src="sellerAvatar">{{ sellerNickname.charAt(0) }}</el-avatar>
         </div>
-        <div class="seller-meta">
-          <span class="meta-item">
-            <span class="meta-icon">🕐</span>
-            {{ onlineStatus }}
-          </span>
-          <span class="meta-item">
-            <span class="meta-icon">📍</span>
-            IP：{{ sellerIp }}
-          </span>
-          <span class="meta-item">
-            <span class="meta-icon">📅</span>
-            来淘籍籍 {{ yearsOnPlatform }} 年
-          </span>
-          <span class="meta-item">
-            <span class="meta-icon">📦</span>
-            已售 {{ sellerSoldCount }} 件
-          </span>
+        <div class="seller-info">
+          <div class="seller-nickname">{{ sellerNickname }}</div>
+          <div class="seller-meta">
+            <span class="meta-item">{{ onlineStatus }}</span>
+            <span class="meta-sep">|</span>
+            <span class="meta-item">IP：{{ sellerIp }}</span>
+            <span class="meta-sep">|</span>
+            <span class="meta-item">来淘籍籍 {{ yearsOnPlatform }} 年</span>
+            <span class="meta-sep">|</span>
+            <span class="meta-item">已售 {{ sellerSoldCount }} 件</span>
+          </div>
         </div>
       </div>
 
@@ -241,61 +231,49 @@ onMounted(() => {
 .seller-section {
   display: flex;
   align-items: center;
-  gap: 24px;
-  padding: 16px 20px;
+  gap: 14px;
+  padding: 14px 20px;
   background: linear-gradient(135deg, #faf6f0 0%, #f5f0eb 100%);
   border-radius: 10px;
   border: 1px solid #e8ddd0;
-  flex-wrap: wrap;
 }
 
 .seller-avatar-area {
-  display: flex;
-  align-items: center;
-  gap: 12px;
   flex-shrink: 0;
+  line-height: 0;
 }
 
-.seller-name-area {
+.seller-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  min-width: 0;
 }
 
 .seller-nickname {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: #3d2413;
-}
-
-.seller-role {
-  font-size: 12px;
-  color: #a0712a;
-  background: #f0e6d6;
-  padding: 1px 8px;
-  border-radius: 10px;
-  display: inline-block;
-  width: fit-content;
+  line-height: 1.3;
 }
 
 .seller-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  flex: 1;
+  align-items: center;
+  gap: 4px;
 }
 
 .meta-item {
-  font-size: 13px;
-  color: #6b5a4a;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  font-size: 12px;
+  color: #8a7a6a;
   white-space: nowrap;
 }
 
-.meta-icon {
-  font-size: 14px;
+.meta-sep {
+  font-size: 12px;
+  color: #c0b0a0;
+  margin: 0 1px;
 }
 
 /* ===== 图书详情 ===== */
@@ -348,8 +326,7 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .detail-container { padding: 12px; }
-  .seller-section { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .seller-meta { gap: 8px; }
+  .seller-section { align-items: flex-start; }
   .book-detail { flex-direction: column; }
   .images { width: 100%; }
   .info { width: 100%; }
