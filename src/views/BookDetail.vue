@@ -18,6 +18,7 @@
             <span class="meta-item">已售 {{ sellerSoldCount }} 件</span>
           </div>
         </div>
+        <el-button class="seller-home-btn" size="small" plain @click="goSellerHome">卖家主页</el-button>
       </div>
 
       <el-divider />
@@ -205,6 +206,12 @@ const buyNow = async () => {
   }
 }
 
+const goSellerHome = () => {
+  if (seller.value?.id) {
+    router.push(`/user/${seller.value.id}`)
+  }
+}
+
 const goBack = () => {
   router.back()
 }
@@ -236,6 +243,22 @@ onMounted(() => {
   background: linear-gradient(135deg, #faf6f0 0%, #f5f0eb 100%);
   border-radius: 10px;
   border: 1px solid #e8ddd0;
+}
+
+.seller-home-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  background: #fff !important;
+  border-color: #d0c0b0 !important;
+  color: #6b5a4a !important;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+.seller-home-btn:hover {
+  background: #faf6f0 !important;
+  border-color: #a0712a !important;
+  color: #a0712a !important;
 }
 
 .seller-avatar-area {

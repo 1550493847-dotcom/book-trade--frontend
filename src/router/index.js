@@ -1,4 +1,4 @@
-﻿import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '@/views/HomePage.vue'
 import Login from '@/views/Login.vue'
 import PublishBook from '@/views/PublishBook.vue'
@@ -14,6 +14,7 @@ import OrderDetail from '@/views/OrderDetail.vue'
 import Notifications from '@/views/Notifications.vue'
 import ReviewPage from '@/views/ReviewPage.vue'
 import CartPage from '@/views/CartPage.vue'
+import SellerPage from '@/views/SellerPage.vue'
 
 const routes = [
   { path: '/', name: 'home', component: HomePage },
@@ -30,7 +31,8 @@ const routes = [
   { path: '/chat', name: 'chatList', component: ChatList, meta: { requiresAuth: true } },
   { path: '/chat/:id', name: 'chatRoom', component: ChatRoom, meta: { requiresAuth: true } },
   { path: '/cart', name: 'cart', component: CartPage, meta: { requiresAuth: true } },
-  { path: '/notifications', name: 'notifications', component: Notifications, meta: { requiresAuth: true } }
+  { path: '/notifications', name: 'notifications', component: Notifications, meta: { requiresAuth: true } },
+  { path: '/user/:id', name: 'sellerPage', component: SellerPage }
 ]
 
 const router = createRouter({
