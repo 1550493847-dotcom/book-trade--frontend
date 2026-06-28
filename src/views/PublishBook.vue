@@ -39,7 +39,8 @@
         </el-form-item>
 
         <el-form-item label="描述" prop="description">
-          <el-input v-model="form.description" type="textarea" :rows="4" />
+          <el-input v-model="form.description" type="textarea" :rows="4" maxlength="200" show-word-limit />
+          <div class="desc-hint">描述不能超过200字</div>
         </el-form-item>
 
         <!-- 图片上传区域 -->
@@ -194,6 +195,11 @@ const resetForm = () => {
 .title {
   font-size: 20px;
   font-weight: bold;
+}
+.desc-hint {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
 }
 .upload-tip {
   font-size: 12px;
