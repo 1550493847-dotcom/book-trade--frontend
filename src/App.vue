@@ -145,6 +145,32 @@ watch(() => route.query.keyword, (val) => {
 onMounted(() => { userStore.refreshFromStorage() })
 </script>
 
+// 心跳：每2分钟报告在线状态
+import { onUnmounted } from "vue"
+import request from "@/api/request"
+
+let heartbeatTimer = null
+
+onMounted(() => {
+  const token = localStorage.getItem("token")
+  if (token) {
+    request.post("/api/user/heartbeat").catch(() => {})
+    heartbeatTimer = setInterval(() => {
+      const tk = localStorage.getItem("token")
+      if (tk) {
+        request.post("/api/user/heartbeat").catch(() => {})
+      }
+    }, 120000)
+  }
+})
+
+onUnmounted(() => {
+  if (heartbeatTimer) {
+    clearInterval(heartbeatTimer)
+    heartbeatTimer = null
+  }
+})
+
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #f5f0eb; }
