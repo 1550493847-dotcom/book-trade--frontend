@@ -74,29 +74,7 @@
             <div class="desc-text">{{ book.description || "暂无描述" }}</div>
           </div>
           
-          <!-- 图书参数 (2列网格) -->
-          <div class="params-grid">
-            <div class="param-item">
-              <span class="param-label">ISBN编号：</span>
-              <span class="param-value">{{ book.isbn || "暂无" }}</span>
-            </div>
-            <div class="param-item">
-              <span class="param-label">书名：</span>
-              <span class="param-value">{{ book.title }}</span>
-            </div>
-            <div class="param-item">
-              <span class="param-label">作者：</span>
-              <span class="param-value">{{ book.author || "暂无" }}</span>
-            </div>
-            <div class="param-item">
-              <span class="param-label">出版社：</span>
-              <span class="param-value">{{ book.publisher || "暂无" }}</span>
-            </div>
-            <div class="param-item">
-              <span class="param-label">成色：</span>
-              <span class="param-value">{{ book.bookCondition || "暂无" }}</span>
-            </div>
-          </div>
+
           
           <!-- ===== 操作按钮 ===== -->
           <div class="actions-inner">
@@ -521,36 +499,7 @@ onMounted(() => {
   white-space: pre-wrap;
 }
 
-/* 图书参数 2列网格 */
-.params-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 20px;
-  margin-bottom: 20px;
-  padding: 12px;
-  background: #faf8f5;
-  border-radius: 8px;
-}
-.param-item {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  padding: 6px 0;
-  border-bottom: 1px dashed #eee;
-}
-.param-item:nth-last-child(-n+2) {
-  border-bottom: none;
-}
-.param-label {
-  color: #888;
-  font-size: 13px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.param-value {
-  color: #333;
-  font-size: 13px;
-}
+
 
 /* ===== 操作按钮 ===== */
 .actions-inner {
@@ -643,7 +592,7 @@ onMounted(() => {
   .thumb-list { flex-direction: row; width: 100%; max-width: 100%; height: 60px; overflow-x: auto; }
   .thumb-item { min-width: 50px; aspect-ratio: 1; }
   .info { width: 100%; }
-  .params-grid { grid-template-columns: 1fr; }
+
   .actions-inner { gap: 8px; }
 }
 </style>

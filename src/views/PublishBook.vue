@@ -10,18 +10,6 @@
           <el-input v-model="form.title" placeholder="请输入书名" />
         </el-form-item>
 
-        <el-form-item label="作者" prop="author">
-          <el-input v-model="form.author" placeholder="请输入作者" />
-        </el-form-item>
-
-        <el-form-item label="ISBN">
-          <el-input v-model="form.isbn" placeholder="请输入ISBN编号" />
-        </el-form-item>
-
-        <el-form-item label="出版社">
-          <el-input v-model="form.publisher" placeholder="请输入出版社" />
-        </el-form-item>
-
         <el-form-item label="成色">
           <el-select v-model="form.bookCondition" placeholder="请选择成色">
             <el-option label="全新" value="全新" />
@@ -90,9 +78,6 @@ const loading = ref(false)
 
 const form = reactive({
   title: "",
-  author: "",
-  isbn: "",
-  publisher: "",
   bookCondition: "",
   category: "",
   originalPrice: null,
@@ -110,7 +95,6 @@ const rules = {
 const customUpload = async (options) => {
   const file = options.file
   
-  // 校验文件类型
   const isImage = file.type === "image/jpeg" || file.type === "image/png" || file.type === "image/jpg"
   const isLt2M = file.size / 1024 / 1024 < 2
   
@@ -123,19 +107,15 @@ const customUpload = async (options) => {
     return false
   }
   
-  // 创建 FormData 对象
   const formData = new FormData()
   formData.append("file", file)
   
   try {
     const res = await request.post("/api/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data"
-      }
+      headers: { "Content-Type": "multipart/form-data" }
     })
     
     if (res.code === 200) {
-      // 拼接图片URL
       const imageUrl = res.data
       if (form.images) {
         form.images = form.images + "," + imageUrl
@@ -155,9 +135,7 @@ const customUpload = async (options) => {
   }
 }
 
-// 移除图片
 const handleRemove = (file, fileList) => {
-  // 重新构建 images 字符串
   const urls = []
   fileList.forEach(item => {
     if (item.response && item.response.data) {
@@ -167,7 +145,6 @@ const handleRemove = (file, fileList) => {
   form.images = urls.join(",")
 }
 
-// 发布商品
 const submit = async () => {
   try {
     await formRef.value.validate()
@@ -175,9 +152,6 @@ const submit = async () => {
 
     const submitData = {
       title: form.title,
-      author: form.author,
-      isbn: form.isbn || null,
-      publisher: form.publisher || null,
       bookCondition: form.bookCondition || null,
       category: form.category,
       originalPrice: form.originalPrice,
@@ -190,9 +164,7 @@ const submit = async () => {
     
     if (res.code === 200) {
       ElMessage.success("发布成功！")
-      setTimeout(() => {
-        router.push("/")
-      }, 1000)
+      setTimeout(() => { router.push("/") }, 1000)
     } else {
       ElMessage.error(res.message || "发布失败")
     }
