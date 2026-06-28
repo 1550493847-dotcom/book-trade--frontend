@@ -10,7 +10,7 @@
       </el-avatar>
       <div class="header-info">
         <div class="chat-title">{{ otherName }}</div>
-        <div class="chat-status" v-if="wsConnected">在线</div>
+        <div class="chat-status" :class="onlineClass">{{ otherOnlineStatus }}</div>
       </div>
     </div>
 
