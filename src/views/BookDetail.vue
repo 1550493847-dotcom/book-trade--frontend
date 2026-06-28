@@ -71,7 +71,8 @@
           
           <!-- 详细描述 -->
           <div class="desc-section">
-            <div class="desc-text">{{ book.description || "暂无描述" }}</div>
+            <div class="desc-text" :class="descFontClass">{{ displayDesc }}</div>
+            <div class="desc-count" v-if="book.description">{{ book.description.length }}/200</div>
           </div>
           
 
@@ -163,6 +164,18 @@ const yearsOnPlatform = computed(() => {
 
 const sellerSoldCount = computed(() => {
   return seller.value?.soldCount ?? 0
+})
+
+// 描述文本：最多200字
+const displayDesc = computed(() => {
+  const text = book.value?.description || ""
+  return text.length > 200 ? text.slice(0, 200) + "..." : text || "暂无描述"
+})
+
+const descFontClass = computed(() => {
+  const len = book.value?.description?.length || 0
+  if (len === 0) return ""
+  return len <= 50 ? "desc-lg" : "desc-sm"
 })
 
 const loadBook = async () => {
@@ -490,13 +503,28 @@ onMounted(() => {
 
 /* 详细描述 */
 .desc-section {
-  margin-bottom: 18px;
+  margin-bottom: 12px;
+  position: relative;
 }
 .desc-text {
-  font-size: 14px;
   color: #444;
-  line-height: 1.7;
+  line-height: 1.6;
   white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.desc-text.desc-lg {
+  font-size: 15px;
+}
+.desc-text.desc-sm {
+  font-size: 13px;
+}
+.desc-count {
+  font-size: 11px;
+  color: #bbb;
+  text-align: right;
+  margin-top: 2px;
 }
 
 
