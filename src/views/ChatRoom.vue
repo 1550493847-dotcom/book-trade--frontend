@@ -541,6 +541,12 @@ onMounted(async () => {
   }
   if (userStore.userInfo?.id) {
     myUserId.value = Number(userStore.userInfo.id)
+  // 不能给自己发消息
+  if (myUserId.value && String(myUserId.value) === otherId.value) {
+    ElMessage.warning("不能给自己发消息")
+    router.push("/chat")
+    return
+  }
   }
   try {
     const res = await request.get(`/api/user/${otherId.value}`)
