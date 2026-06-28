@@ -72,7 +72,7 @@
           <!-- 详细描述 -->
           <div class="desc-section">
             <div class="desc-text" :class="descFontClass">{{ displayDesc }}</div>
-            <div class="desc-count" v-if="book.description">{{ book.description.length }}/200</div>
+
           </div>
           
 
@@ -520,12 +520,7 @@ onMounted(() => {
 .desc-text.desc-sm {
   font-size: 13px;
 }
-.desc-count {
-  font-size: 11px;
-  color: #bbb;
-  text-align: right;
-  margin-top: 2px;
-}
+
 
 
 
