@@ -30,12 +30,24 @@
       
       <!-- ===== 图书详情区域 ===== -->
       <div class="book-detail">
+        <!-- 图片区：左缩略图 + 右大图 1:4 -->
         <div class="images">
-          <el-carousel height="400px" v-if="imageList.length > 0">
-            <el-carousel-item v-for="(img, index) in imageList" :key="index">
-              <img v-lazy="getImageUrl(img)" class="detail-img" />
-            </el-carousel-item>
-          </el-carousel>
+          <div class="image-gallery" v-if="imageList.length > 0">
+            <div class="thumb-list">
+              <div
+                v-for="(img, index) in imageList"
+                :key="index"
+                class="thumb-item"
+                :class="{ active: selectedIndex === index }"
+                @click="selectedIndex = index"
+              >
+                <img :src="getImageUrl(img)" />
+              </div>
+            </div>
+            <div class="main-image">
+              <img :src="getImageUrl(imageList[selectedIndex])" />
+            </div>
+          </div>
           <div v-else class="no-img">暂无图片</div>
         </div>
         
@@ -121,6 +133,7 @@ const book = ref(null)
 const seller = ref(null)
 const imageList = ref([])
 const cartInStore = ref(false)
+const selectedIndex = ref(0)
 
 const getImageUrl = (path) => {
   if (!path) return ""
@@ -183,7 +196,7 @@ const loadBook = async () => {
       book.value = data
       seller.value = data.seller || null
       if (data.images) {
-        imageList.value = data.images.split(",")
+        imageList.value = data.images.split(",").filter(Boolean)
       }
     } else {
       ElMessage.error("商品不存在")
@@ -361,10 +374,87 @@ onMounted(() => {
   gap: 40px;
   flex-wrap: wrap;
 }
+
+/* ===== 图片区：左缩略图 + 右大图 ===== */
 .images {
   flex: 1;
-  min-width: 300px;
+  min-width: 350px;
 }
+
+.image-gallery {
+  display: flex;
+  gap: 12px;
+  height: 450px;
+}
+
+/* 左侧缩略图列 */
+.thumb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 20%;
+  min-width: 72px;
+  max-width: 100px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.thumb-item {
+  border: 2px solid transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f0eb;
+}
+
+.thumb-item:hover {
+  border-color: #c0b0a0;
+}
+
+.thumb-item.active {
+  border-color: #a0712a;
+}
+
+.thumb-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 右侧大图 */
+.main-image {
+  flex: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.no-img {
+  width: 100%;
+  height: 400px;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  border-radius: 8px;
+}
+
+/* ===== 右侧信息 ===== */
 .info {
   flex: 1;
   min-width: 300px;
@@ -462,22 +552,6 @@ onMounted(() => {
   font-size: 13px;
 }
 
-/* 图片 */
-.detail-img {
-  width: 100%;
-  height: 400px;
-  object-fit: contain;
-}
-.no-img {
-  width: 100%;
-  height: 400px;
-  background: #f5f5f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-}
-
 /* ===== 操作按钮 ===== */
 .actions-inner {
   display: flex;
@@ -564,9 +638,11 @@ onMounted(() => {
   .detail-container { padding: 12px; }
   .seller-section { align-items: flex-start; }
   .book-detail { flex-direction: column; }
-  .images { width: 100%; }
+  .images { width: 100%; min-width: 0; }
+  .image-gallery { height: 300px; flex-direction: column-reverse; }
+  .thumb-list { flex-direction: row; width: 100%; max-width: 100%; height: 60px; overflow-x: auto; }
+  .thumb-item { min-width: 50px; aspect-ratio: 1; }
   .info { width: 100%; }
-  .detail-img { height: 250px; }
   .params-grid { grid-template-columns: 1fr; }
   .actions-inner { gap: 8px; }
 }
