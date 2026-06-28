@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="chat-list-container">
     <h2>我的消息</h2>
 
@@ -41,14 +41,6 @@ import request from '@/api/request'
 const router = useRouter()
 const chatList = ref([])
 const loading = ref(false)
-
-const getOnlineText = (lastTime) => {
-  if (!lastTime) return ""
-  const diffMs = Date.now() - new Date(lastTime).getTime()
-  const diffMin = Math.floor(diffMs / 60000)
-  if (diffMin < 5) return "在线"
-  return diffMin + " 分钟前在线"
-}
 
 const formatTime = (timeStr) => {
   if (!timeStr) return ''

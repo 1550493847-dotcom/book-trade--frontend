@@ -10,7 +10,7 @@
       </el-avatar>
       <div class="header-info">
         <div class="chat-title">{{ otherName }}</div>
-        <div class="chat-status" :class="onlineClass">{{ otherOnlineStatus }}</div>
+        <div class="chat-status" v-if="wsConnected">在线</div>
       </div>
     </div>
 
@@ -153,7 +153,6 @@ const messages = ref([])
 const inputText = ref('')
 const messageListRef = ref(null)
 const otherName = ref('')
-const otherUser = ref(null)
 const myUserId = ref(null)
 const loading = ref(false)
 const sending = ref(false)
@@ -326,22 +325,6 @@ const previewImage = (url) => {
   window.open(url, '_blank')
 }
 const otherId = computed(() => String(route.params.id))
-
-const otherOnlineStatus = computed(() => {
-  if (!otherUser.value?.lastLoginTime) return '暂无在线记录'
-  const diffMs = Date.now() - new Date(otherUser.value.lastLoginTime).getTime()
-  const diffMin = Math.floor(diffMs / 60000)
-  if (diffMin < 5) return '在线'
-  if (diffMin < 60) return diffMin + ' 分钟前在线'
-  const diffHour = Math.floor(diffMin / 60)
-  if (diffHour < 24) return diffHour + ' 小时前在线'
-  return Math.floor(diffHour / 24) + ' 天前在线'
-})
-
-const onlineClass = computed(() => {
-  if (!otherUser.value?.lastLoginTime) return ''
-  return (Date.now() - new Date(otherUser.value.lastLoginTime).getTime()) < 300000 ? 'status-online' : 'status-offline'
-})
 
 const wsUrl = computed(() => {
   const token = userStore.token
