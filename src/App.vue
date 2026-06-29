@@ -181,6 +181,15 @@ body { background: #f5f0eb; }
   box-shadow: 0 2px 12px rgba(0,0,0,0.12);
 }
 .header-inner {
+  --s: 83px;
+  --o: 0.5;
+  --c1: rgba(244, 235, 208, var(--o));
+  --c2: rgba(194, 178, 163, var(--o));
+  background-image: linear-gradient(var(--c1) 50%, var(--c2) 50%),
+    linear-gradient(45deg, var(--c1) 50%, var(--c2) 50%),
+    linear-gradient(90deg, var(--c1) 50%, var(--c2) 50%),
+    linear-gradient(135deg, var(--c1) 50%, var(--c2) 50%);
+  background-size: var(--s) var(--s);
   max-width: 1200px;
   margin: 0 auto;
   height: 58px;
