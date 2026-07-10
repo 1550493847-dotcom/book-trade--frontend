@@ -36,7 +36,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/book-trade--frontend/'), // 添加了基础路径
   routes
 })
 
