@@ -18,6 +18,19 @@
             <span class="brand-name">淘籍籍</span>
           </div>
 
+          <!-- 中间：搜索框 -->
+          <div class="header-search">
+            <div class="search-box nav-search-box">
+              <el-icon class="search-icon"><Search /></el-icon>
+              <input
+                v-model="searchKeyword"
+                class="search-input"
+                placeholder="搜书名、作者…"
+                @keyup.enter="doSearch"
+              />
+            </div>
+          </div>
+
           <!-- 右侧：导航链接 -->
           <div class="header-right">
 <!-- 未登录 -->
@@ -51,22 +64,6 @@
           </div>
         </div>
       </header>
-
-      <!-- ===== 固定搜索栏 ===== -->
-      <div class="search-section">
-        <div class="search-inner">
-          <div class="search-box">
-            <el-icon class="search-icon"><Search /></el-icon>
-            <input
-              v-model="searchKeyword"
-              class="search-input"
-              placeholder="搜索书名、作者、分类…"
-              @keyup.enter="doSearch"
-            />
-            <el-button type="primary" class="search-btn" @click="doSearch">搜索</el-button>
-          </div>
-        </div>
-      </div>
 
       <!-- ===== 页面内容 ===== -->
       <main class="main-content">
@@ -181,21 +178,12 @@ body { background: #f5f0eb; }
   box-shadow: 0 2px 12px rgba(0,0,0,0.12);
 }
 .header-inner {
-  --s: 83px;
-  --o: 0.5;
-  --c1: rgba(244, 235, 208, var(--o));
-  --c2: rgba(194, 178, 163, var(--o));
-  background-image: linear-gradient(var(--c1) 50%, var(--c2) 50%),
-    linear-gradient(45deg, var(--c1) 50%, var(--c2) 50%),
-    linear-gradient(90deg, var(--c1) 50%, var(--c2) 50%),
-    linear-gradient(135deg, var(--c1) 50%, var(--c2) 50%);
-  background-size: var(--s) var(--s);
   max-width: 1200px;
   margin: 0 auto;
   height: 58px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 16px;
   padding: 0 20px;
 }
 .header-left {
@@ -222,6 +210,44 @@ body { background: #f5f0eb; }
   display: flex;
   align-items: center;
   gap: 2px;
+  flex-shrink: 0;
+}
+.header-search {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.nav-search-box {
+  width: 100%;
+  border-radius: 50px;
+  padding: 2px 2px 2px 16px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.20);
+  transition: all 0.25s;
+}
+.nav-search-box:focus-within {
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.3);
+}
+.nav-search-box .search-input {
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #3d2413;
+}
+.nav-search-box .search-input::placeholder {
+  color: #c4a882;
+}
+.nav-search-box:focus-within .search-input {
+  color: #333;
+}
+.nav-search-box:focus-within .search-input::placeholder {
+  color: #c4a882;
+}
+.nav-search-box .search-icon {
+  color: #c4a882;
+  font-size: 16px;
 }
 .nav-link {
   display: flex;
@@ -255,15 +281,6 @@ body { background: #f5f0eb; }
 .user-trigger:hover { background: rgba(255,255,255,0.12); }
 .user-name { font-size: 13px; max-width: 50px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.search-section {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  background: #f5f0eb;
-  padding: 14px 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-.search-inner { max-width: 680px; margin: 0 auto; }
 .search-box {
   display: flex;
   align-items: center;
@@ -305,11 +322,11 @@ body { background: #f5f0eb; }
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px 80px;
-  min-height: calc(100vh - 58px - 74px);
+  min-height: calc(100vh - 58px);
 }
 
 @media (max-width: 768px) {
-  .main-content { padding: 12px; min-height: calc(100vh - 58px - 74px); }
+  .main-content { padding: 12px; min-height: calc(100vh - 58px); }
 }
 /* ===== 导航按钮高亮（白色底色） ===== */
 .nav-link.active {
@@ -372,9 +389,9 @@ body { background: #f5f0eb; }
 @media (max-width: 768px) {
   .header-inner { padding: 0 12px; }
   .brand-name { font-size: 16px; letter-spacing: 2px; }
-  .search-section { padding: 10px 12px; }
-  .search-input { padding: 8px 10px; font-size: 13px; }
-  .search-btn { padding: 8px 18px !important; font-size: 13px; }
+  
+  .nav-search-box .search-input { padding: 5px 8px; font-size: 12px; }
+  
 
   /* 导航链接：小屏只显示图标 */
   .nav-link span { display: none; }
