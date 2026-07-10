@@ -5,7 +5,8 @@ import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
-  base: '/book-trade--frontend/', // �?这是新增的关键配�?  plugins: [
+  base: '/book-trade--frontend/', 
+plugins: [
     vue(),
     vueJsx(),
     vueDevTools(),
