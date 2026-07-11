@@ -180,11 +180,38 @@ body { background: #f5f0eb; }
 .header-inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 80px;
   max-width: 1400px;
   margin: 0 auto;
-  height: 100%;
+  height: 58px;
+  padding: 0 80px;
+}
+
+/* 左中右三栏，让搜索框居中 */
+.header-left {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  min-width: 160px;
+}
+
+.header-search {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 500px;
+  width: 100%;
+}
+
+.header-right {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-width: 160px;
 }
 .header-left {
   flex: 0 0 auto;
@@ -445,4 +472,5 @@ body { background: #f5f0eb; }
 }
 
 </style>
+
 
