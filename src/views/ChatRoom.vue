@@ -329,7 +329,8 @@ const otherId = computed(() => String(route.params.id))
 const wsUrl = computed(() => {
   const token = userStore.token
   if (!token) return ''
-  return `ws://localhost:8080/ws/chat?token=${token}`
+  const wsBase = import.meta.env.VITE_WS_URL || "ws://localhost:8080/ws/chat"
+  return `${wsBase}?token=${token}`
 })
 
 let ws = null
