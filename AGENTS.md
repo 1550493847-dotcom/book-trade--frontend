@@ -145,3 +145,19 @@ npm run format       # 代码格式化
 npm run test:unit    # 运行单元测试
 npm run test:e2e     # 运行 e2e 测试
 ```
+
+## IP 地理定位（卖家位置）
+
+**功能**：图书详情页显示卖家所在城市（地级市），替代原始 IP 地址
+
+**数据来源**：
+- 后端 `BookController` 图书详情 API 返回 `seller.lastLoginLocation`
+- 后端通过 ip-api.com 将 IP 解析为中文城市名，Redis 缓存
+
+**前端实现**：
+- `BookDetail.vue`：`sellerIp` computed 优先取 `lastLoginLocation`，降级到 `lastLoginIp`
+- 显示为：`位置：广东省 广州市`（或 `位置：北京市`）
+
+**相关文件**：
+- `src/views/BookDetail.vue` — 展示位置信息
+- 后端 `IpLocationService.java` — IP 解析服务
