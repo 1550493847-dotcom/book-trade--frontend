@@ -186,32 +186,30 @@ body { background: #f5f0eb; }
   padding: 0 80px;
 }
 
-/* 左中右三栏，让搜索框居中 */
+/* 左中右三栏等宽，让搜索框自然居中 */
 .header-left {
-  flex: 0 0 auto;
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 10px;
   cursor: pointer;
   user-select: none;
-  min-width: 160px;
 }
 
 .header-search {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
   max-width: 500px;
-  width: 100%;
+  width: 40%;
 }
 
 .header-right {
-  flex: 0 0 auto;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
-  min-width: 160px;
 }
 .header-left {
   flex: 0 0 auto;
@@ -472,5 +470,6 @@ body { background: #f5f0eb; }
 }
 
 </style>
+
 
 
