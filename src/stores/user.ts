@@ -14,7 +14,7 @@ export const useUserStore = defineStore('user', () => {
     const avatar = userInfo.value?.avatar
     if (!avatar) return ''
     if (avatar.startsWith('http')) return avatar
-    return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080' + avatar
+    return (import.meta.env.VITE_API_BASE_URL || '') + avatar
   })
 
   const displayName = computed(() => {
