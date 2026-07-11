@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div id="app">
     <!-- 登录页全屏显示，不套外壳 -->
     <template v-if="route.path === '/login'">
@@ -178,20 +178,38 @@ body { background: #f5f0eb; }
   box-shadow: 0 2px 12px rgba(0,0,0,0.12);
 }
 .header-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  height: 58px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 0 20px;
+  justify-content: space-between;
+  padding: 0 80px;
+  max-width: 1400px;
+  margin: 0 auto;
+  height: 100%;
 }
 .header-left {
+  flex: 0 0 auto;
+  min-width: 160px;
   display: flex;
   align-items: center;
   gap: 10px;
   cursor: pointer;
   user-select: none;
+}
+
+.header-search {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  max-width: 500px;
+}
+
+.header-right {
+  flex: 0 0 auto;
+  min-width: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
 }
 .logo-placeholder {
   width: 36px; height: 36px;
@@ -427,3 +445,4 @@ body { background: #f5f0eb; }
 }
 
 </style>
+
