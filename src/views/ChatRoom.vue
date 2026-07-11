@@ -194,7 +194,7 @@ const handleFileSelect = async (event) => {
       timeout: 30000,
     })
     if (res.code === 200) {
-      const imgUrl = res.data.startsWith('http') ? res.data : 'http://localhost:8080' + res.data
+      const imgUrl = res.data.startsWith('http') ? res.data : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080') + res.data
       await sendImageMessage(imgUrl)
     } else {
       ElMessage.error(res.message || '上传失败')

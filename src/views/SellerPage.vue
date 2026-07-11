@@ -48,7 +48,7 @@ const sellerAvatar = computed(() => {
   if (!seller.value) return ''
   const a = seller.value.avatar
   if (!a) return ''
-  return a.startsWith('http') ? a : 'http://localhost:8080' + a
+  return a.startsWith('http') ? a : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080') + a
 })
 
 const sellerNickname = computed(() => seller.value?.nickname || seller.value?.username || '未知')

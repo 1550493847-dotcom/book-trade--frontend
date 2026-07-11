@@ -117,7 +117,7 @@ const selectedIndex = ref(0)
 const getImageUrl = (path) => {
   if (!path) return ""
   if (path.startsWith("http")) return path
-  return "http://localhost:8080" + path
+  return (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080') + path
 }
 
 const sellerAvatar = computed(() => {
@@ -125,7 +125,7 @@ const sellerAvatar = computed(() => {
   const avatar = seller.value.avatar
   if (!avatar) return ""
   if (avatar.startsWith("http")) return avatar
-  return "http://localhost:8080" + avatar
+  return (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080') + avatar
 })
 
 const sellerNickname = computed(() => {
