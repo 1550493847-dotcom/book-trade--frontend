@@ -82,6 +82,24 @@
         <el-form-item label="售价">
           <el-input-number v-model="editForm.sellPrice" :min="0" :precision="2" />
         </el-form-item>
+        <el-form-item label="商品图片">
+          <div class="edit-images">
+            <div v-for="(img, idx) in editImageList" :key="idx" class="edit-image-item">
+              <img :src="getImageUrl(img)" />
+              <el-button class="img-del-btn" size="small" circle type="danger" @click="removeEditImage(idx)">×</el-button>
+            </div>
+            <el-upload
+              v-if="editImageList.length < 3"
+              :http-request="editUploadImage"
+              :show-file-list="false"
+            >
+              <el-button class="add-img-btn" size="small">
+                <el-icon><Plus /></el-icon>
+              </el-button>
+            </el-upload>
+          </div>
+          <div class="upload-tip">最多3张图片，悬停图片可删除，点击新增</div>
+        </el-form-item>
         <el-form-item label="描述">
           <el-input v-model="editForm.description" type="textarea" :rows="3" />
         </el-form-item>
@@ -99,6 +117,8 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request, { imageBaseUrl } from '@/api/request'
+import { Plus } from '@element-plus/icons-vue'
+import { ElMessageBox } from 'element-plus'
 
 const router = useRouter()
 const bookList = ref([])
@@ -106,6 +126,8 @@ const loading = ref(false)
 const editDialogVisible = ref(false)
 const saving = ref(false)
 const editForm = reactive({
+const editImageList = ref([])  // 编辑中的图片列表
+const editUploadFiles = ref([]) // 已上传的文件路径
   id: null,
   title: '',
   author: '',
@@ -173,6 +195,13 @@ const onShelf = async (id) => {
 }
 
 const openEdit = (book) => {
+  // 加载已有图片
+  if (book.images) {
+    editImageList.value = book.images.split(",").filter(Boolean)
+  } else {
+    editImageList.value = []
+  }
+  editUploadFiles.value = []
   editForm.id = book.id
   editForm.title = book.title
   editForm.author = book.author || ''
@@ -192,7 +221,8 @@ const saveEdit = async () => {
       category: editForm.category,
       originalPrice: editForm.originalPrice,
       sellPrice: editForm.sellPrice,
-      description: editForm.description
+      description: editForm.description,
+      images: editImageList.value.join(",")
     })
     if (res.code === 200) {
       ElMessage.success('修改成功')
@@ -235,7 +265,53 @@ const goToDetail = (id) => {
 onMounted(() => {
   loadMyBooks()
 })
-</script>
+// ===== 编辑图片管理 =====
+const editUploadImage = async (options) => {
+  const file = options.file
+  const isImage = file.type === "image/jpeg" || file.type === "image/png" || file.type === "image/jpg"
+  const isLt2M = file.size / 1024 / 1024 < 2
+  if (!isImage) { ElMessage.error("只能上传 JPG/PNG 格式的图片!"); return }
+  if (!isLt2M) { ElMessage.error("图片大小不能超过 2MB!"); return }
+  const formData = new FormData()
+  formData.append("file", file)
+  try {
+    const res = await request.post("/api/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    })
+    if (res.code === 200) {
+      editImageList.value.push(res.data)
+      ElMessage.success("图片上传成功")
+      options.onSuccess()
+    } else {
+      ElMessage.error("上传失败"); options.onError()
+    }
+  } catch (error) {
+    ElMessage.error("上传失败，请重试"); options.onError()
+  }
+}
+
+const removeEditImage = async (idx) => {
+  const imgPath = editImageList.value[idx]
+  try {
+    // 尝试从服务器删除文件
+    await request.delete("/api/upload", { params: { path: imgPath } })
+  } catch (e) { /* 文件删除失败不影响图片列表移除 */ }
+  editImageList.value.splice(idx, 1)
+}
+
+      ElMessage.success('修改成功')
+      editDialogVisible.value = false
+      loadMyBooks()
+    } else {
+      ElMessage.error(res.message || '修改失败')
+    }
+  } catch (error) {
+    ElMessage.error('请求失败')
+  } finally {
+    saving.value = false
+  }
+}
+
 
 <style scoped>
 .my-books-container {
@@ -302,6 +378,64 @@ h2 {
 }
 
 @media (max-width: 768px) {
+.edit-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
+}
+.edit-image-item {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #d9d9d9;
+}
+.edit-image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.edit-image-item:hover .img-del-btn {
+  opacity: 1;
+}
+.img-del-btn {
+  position: absolute !important;
+  top: -6px;
+  right: -6px;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  padding: 0 !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 1;
+}
+.add-img-btn {
+  width: 80px;
+  height: 80px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  background: #fafafa;
+}
+.add-img-btn:hover {
+  border-color: #a0712a;
+  color: #a0712a;
+}
+.upload-tip {
+  font-size: 12px;
+  color: #999;
+  margin-top: 6px;
+}
   .mybooks-container { padding: 12px; }
   .book-list { gap: 10px; }
   .book-card { width: calc(50% - 5px); }
@@ -310,3 +444,7 @@ h2 {
 }
 
 </style>
+
+
+
+

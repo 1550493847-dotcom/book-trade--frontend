@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="detail-container">
     <!-- ===== 返回按钮（卡片外） ===== -->
     <div class="back-top">
@@ -16,7 +16,7 @@
           <div class="seller-meta">
             <span class="meta-item">{{ onlineStatus }}</span>
             <span class="meta-sep">|</span>
-            <span class="meta-item">位置：{{ sellerIp }}</span>
+            <span class="meta-item">IP：{{ sellerIp }}</span>
             <span class="meta-sep">|</span>
             <span class="meta-item">来淘籍籍 {{ yearsOnPlatform }} 年</span>
             <span class="meta-sep">|</span>
@@ -147,8 +147,7 @@ const onlineStatus = computed(() => {
 })
 
 const sellerIp = computed(() => {
-  // 优先显示解析后的城市地址，没有则显示原始 IP
-  return seller.value?.lastLoginLocation || seller.value?.lastLoginIp || "未知"
+  return seller.value?.lastLoginIp || "未知"
 })
 
 const yearsOnPlatform = computed(() => {
@@ -620,5 +619,3 @@ onMounted(() => {
   .actions-inner { gap: 8px; }
 }
 </style>
-
-
