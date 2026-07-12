@@ -270,7 +270,7 @@ onMounted(() => {
 }
 
 .book-card {
-  border-radius: 12px;
+  border-radius: 20px;
   overflow: hidden;
 }
 

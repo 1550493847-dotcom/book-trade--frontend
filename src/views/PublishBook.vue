@@ -95,27 +95,29 @@ const rules = {
 // 自定义上传方法
 const customUpload = async (options) => {
   const file = options.file
-  
+  if (!file) {
+    ElMessage.error("请选择图片")
+    options.onError(new Error("no file"))
+    return
+  }
   const isImage = file.type === "image/jpeg" || file.type === "image/png" || file.type === "image/jpg"
   const isLt2M = file.size / 1024 / 1024 < 2
-  
   if (!isImage) {
-    ElMessage.error("只能上传 JPG/PNG 格式的图片!")
-    return false
+    ElMessage.error("只能上传 JPG/PNG 格式的图片")
+    options.onError(new Error("格式不支持"))
+    return
   }
   if (!isLt2M) {
     ElMessage.error("图片大小不能超过 2MB!")
-    return false
+    options.onError(new Error("图片太大"))
+    return
   }
-  
   const formData = new FormData()
   formData.append("file", file)
-  
   try {
     const res = await request.post("/api/upload", formData, {
       headers: { "Content-Type": "multipart/form-data" }
     })
-    
     if (res.code === 200) {
       const imageUrl = res.data
       if (form.images) {
@@ -124,15 +126,15 @@ const customUpload = async (options) => {
         form.images = imageUrl
       }
       ElMessage.success("图片上传成功")
-      options.onSuccess()
+      options.onSuccess(res)
     } else {
-      ElMessage.error("上传失败")
-      options.onError()
+      ElMessage.error(res.message || "上传失败")
+      options.onError(new Error(res.message || "上传失败"))
     }
   } catch (error) {
     console.error("上传错误:", error)
     ElMessage.error("上传失败，请重试")
-    options.onError()
+    options.onError(error || new Error("上传失败"))
   }
 }
 

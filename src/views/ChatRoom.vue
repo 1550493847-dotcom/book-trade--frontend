@@ -194,12 +194,14 @@ const handleFileSelect = async (event) => {
       timeout: 30000,
     })
     if (res.code === 200) {
-      const imgUrl = res.data.startsWith('http') ? res.data : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080') + res.data
+      const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+      const imgUrl = res.data && res.data.startsWith('http') ? res.data : baseURL + (res.data || '')
       await sendImageMessage(imgUrl)
     } else {
       ElMessage.error(res.message || '上传失败')
     }
-  } catch {
+  } catch (error) {
+    console.error("上传错误:", error)
     ElMessage.error('图片上传失败')
   } finally {
     uploading.value = false
